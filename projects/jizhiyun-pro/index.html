@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN" class="scroll-smooth">
 <head>
 <meta charset="UTF-8">
@@ -85,6 +85,10 @@
 
 <!-- ===== 页脚 ===== -->
 <footer id="footer" class="bg-slate-900 text-slate-400 pt-16 pb-8"></footer>
+
+<!-- ===== 全局容器 ===== -->
+<div id="toastContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2"></div>
+<div id="modalContainer" class="fixed inset-0 z-[9998] pointer-events-none"></div>
 
 <!-- ===== 回到顶部按钮 ===== -->
 <button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" class="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-brand-500 text-white shadow-lg hover:bg-brand-600 transition-all opacity-0 pointer-events-none z-40">

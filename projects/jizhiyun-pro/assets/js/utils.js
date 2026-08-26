@@ -1,4 +1,4 @@
-﻿/* ===================================================================
+/* ===================================================================
  * utils.js - 通用工具函数
  * 包含：Toast消息、DOM操作、表单验证、格式化、复制、懒加载、防抖节流
  * =================================================================== */
@@ -136,4 +136,92 @@ App.Utils = {
     }
     return html;
   }
+};
+
+/* ===================================================================
+ * 全局设置方法（挂载到 App 顶层，供 index.html 初始化和内联 onclick 调用）
+ * =================================================================== */
+
+/* 设置主题色（CSS 变量） */
+App.setThemeColor = function(color) {
+  const root = document.documentElement;
+  root.style.setProperty('--brand-color', color);
+  // 兼容 Tailwind brand 色阶（简化处理，主色直接覆盖）
+  root.style.setProperty('--brand-500', color);
+  App.Store.set('themeColor', color);
+};
+
+/* 设置全局字体大小 */
+App.setFontSize = function(size) {
+  document.documentElement.style.fontSize = size + 'px';
+  App.Store.set('fontSize', size);
+};
+
+/* 切换明暗主题 */
+App.toggleTheme = function() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  App.Store.set('darkMode', isDark ? 'true' : 'false');
+};
+
+/* 切换移动端菜单 */
+App.toggleMobileMenu = function() {
+  const menu = document.getElementById('mobileMenu');
+  if (menu) menu.classList.toggle('hidden');
+};
+
+/* 打开设置面板（动态创建） */
+App.openSettings = function() {
+  // 已存在则直接显示
+  let panel = document.getElementById('settingsPanel');
+  if (panel) {
+    panel.style.display = 'flex';
+    return;
+  }
+  // 动态创建设置面板
+  panel = document.createElement('div');
+  panel.id = 'settingsPanel';
+  panel.className = 'fixed inset-0 z-[100] items-center justify-center bg-black/50';
+  panel.style.display = 'flex';
+  panel.innerHTML = `
+    <div class="glass-card w-full max-w-md p-6 m-4" onclick="event.stopPropagation()">
+      <div class="flex justify-between items-center mb-5">
+        <h3 class="font-bold text-lg">系统设置</h3>
+        <button class="icon-btn" onclick="App.closeSettings()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-5">
+        <div>
+          <label class="block text-sm font-medium mb-2">主题色</label>
+          <div class="flex gap-2">
+            ${['#3373ff','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'].map(c=>`
+              <button onclick="App.setThemeColor('${c}');App.Utils.toast('主题色已更新','success')"
+                class="w-8 h-8 rounded-full border-2 border-white shadow" style="background:${c}"></button>
+            `).join('')}
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">字体大小: <span id="fontSizeVal">16</span>px</label>
+          <input type="range" id="fontRange" min="12" max="22" value="16" class="w-full"
+            oninput="App.setFontSize(this.value);document.getElementById('fontSizeVal').textContent=this.value">
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium">深色模式</span>
+          <button onclick="App.toggleTheme()" class="btn-ghost btn-sm">切换</button>
+        </div>
+      </div>
+      <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700 text-center text-xs text-slate-400">
+        极智云 · 演示项目 · 设置保存在本地浏览器
+      </div>
+    </div>`;
+  panel.addEventListener('click', () => App.closeSettings());
+  document.body.appendChild(panel);
+  // 同步当前设置值
+  const curSize = App.Store.get('fontSize') || 16;
+  const fr = document.getElementById('fontRange');
+  if (fr) { fr.value = curSize; document.getElementById('fontSizeVal').textContent = curSize; }
+};
+
+/* 关闭设置面板 */
+App.closeSettings = function() {
+  const panel = document.getElementById('settingsPanel');
+  if (panel) panel.style.display = 'none';
 };
