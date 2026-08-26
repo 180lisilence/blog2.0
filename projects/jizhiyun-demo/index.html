@@ -11,8 +11,21 @@
 <script src="assets/lib/fontawesome/all.min.js"></script>
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="../enhance.css">
+<style>
+/* 全局主题切换小太阳（固定右上角，始终可见） */
+.global-sun-btn{position:fixed;top:16px;right:16px;z-index:999999;width:42px;height:42px;border-radius:50%;border:2px solid rgba(255,200,50,.7);background:linear-gradient(135deg,#ffd700,#ff8c00);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 12px rgba(255,165,0,.5);transition:all .3s;animation:globalSunSpin 6s linear infinite;backdrop-filter:blur(4px)}
+.global-sun-btn:hover{transform:scale(1.15) rotate(15deg);box-shadow:0 4px 20px rgba(255,165,0,.8);animation-play-state:paused}
+@keyframes globalSunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+/* 深色模式：用 filter 反转整个页面颜色 */
+body.theme-dark{filter:invert(1) hue-rotate(180deg)}
+body.theme-dark img,body.theme-dark video,body.theme-dark canvas,body.theme-dark iframe{filter:invert(1) hue-rotate(180deg)}
+/* 深色模式下小太阳保持原色 */
+body.theme-dark .global-sun-btn{filter:invert(1) hue-rotate(180deg)}
+</style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+
+<button class="global-sun-btn" id="globalSunBtn" title="切换深色/浅色模式"><i class="fa-solid fa-sun"></i></button>
 
 <div id="globalLoader">
   <div class="loader-logo">
@@ -253,5 +266,19 @@ try {
 #globalLoader.light-mode .loader-theme-label{color:rgba(0,0,0,.6)!important}
 </style>
 <a href="../../index.html" class="back-to-blog">← 返回博客</a>
+<script>
+(function(){
+  var btn=document.getElementById("globalSunBtn");
+  var isDark=localStorage.getItem("globalThemeDark")==="true";
+  if(isDark)document.body.classList.add("theme-dark");
+  if(btn){
+    btn.addEventListener("click",function(e){
+      e.stopPropagation();
+      var dark=document.body.classList.toggle("theme-dark");
+      localStorage.setItem("globalThemeDark",dark?"true":"false");
+    });
+  }
+})();
+</script>
 </body>
 </html>
