@@ -18,7 +18,9 @@ App.API = {
       const t = setTimeout(() => ctrl.abort(), 1500);
       const res = await fetch(App.Config.apiBase + '/config', { signal: ctrl.signal });
       clearTimeout(t);
-      this._backendOnline = res.ok;
+      // 不仅检查 res.ok，还要检查返回的是 JSON（GitHub Pages 会对不存在路径返回 200 + HTML）
+      const contentType = res.headers.get('content-type') || '';
+      this._backendOnline = res.ok && contentType.includes('application/json');
     } catch (e) {
       this._backendOnline = false;
     }
@@ -77,34 +79,6 @@ App.API = {
     const id = parts[1];
     const query = {};
     if (queryStr) queryStr.split('&').forEach(p => { const [k,v] = p.split('='); query[k] = decodeURIComponent(v); });
-
-    // 特殊端点处理
-    if (collection === 'categories' && !id) {
-      return db.categories || { article: [], product: [] };
-    }
-    if (collection === 'config' && !id) {
-      return db.siteConfig || App.Config.site;
-    }
-    if (collection === 'stats' && !id) {
-      const orders = db.orders || [];
-      return {
-        userCount: (db.users || []).length,
-        articleCount: (db.articles || []).length,
-        productCount: (db.products || []).length,
-        orderCount: orders.length,
-        totalRevenue: orders.reduce((s, o) => s + (o.total || 0), 0),
-        messageCount: (db.messages || []).length,
-        weeklyVisits: [320, 450, 380, 520, 610, 580, 720],
-        weeklyOrders: [12, 18, 15, 22, 28, 25, 30],
-        articleCategoryDist: {},
-        orderStatusDist: ['已完成', '处理中', '待付款'].map(s => ({ name: s, value: orders.filter(o => o.status === s).length }))
-      };
-    }
-    if (collection === 'login' && !id) {
-      const user = (db.users || []).find(u => u.username === body?.username && u.password === body?.password);
-      if (!user) throw new Error('账号或密码错误');
-      return { token: btoa(user.id + ':' + Date.now()), user: { id: user.id, username: user.username, role: user.role, vip: user.vip, email: user.email, avatar: user.avatar, phone: user.phone } };
-    }
 
     let list = db[collection] || [];
 

@@ -1,4 +1,4 @@
-﻿/* ===================================================================
+/* ===================================================================
  * api.js - 数据接口封装层
  * 策略：优先调用后端 API（http://localhost:3000/api）；
  *       后端不可用时，自动降级为本地 JSON 数据（前端 fetch 本地文件）。
@@ -18,7 +18,9 @@ App.API = {
       const t = setTimeout(() => ctrl.abort(), 1500);
       const res = await fetch(App.Config.apiBase + '/config', { signal: ctrl.signal });
       clearTimeout(t);
-      this._backendOnline = res.ok;
+      // 不仅检查 res.ok，还要检查返回的是 JSON（GitHub Pages 会对不存在路径返回 200 + HTML）
+      const contentType = res.headers.get('content-type') || '';
+      this._backendOnline = res.ok && contentType.includes('application/json');
     } catch (e) {
       this._backendOnline = false;
     }
