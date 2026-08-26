@@ -37,13 +37,47 @@
 <!-- ===== 项目自定义样式 ===== -->
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="../enhance.css">
+
+<!-- ===== 炫酷加载引导页样式 ===== -->
+<style>
+#globalLoader{position:fixed;inset:0;z-[9999];display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);overflow:hidden;transition:opacity .6s ease,visibility .6s ease}
+#globalLoader::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(51,115,255,.15) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:pulseGlow 3s ease-in-out infinite}
+#globalLoader::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:40px 40px;animation:gridMove 20s linear infinite}
+@keyframes pulseGlow{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.6}50%{transform:translate(-50%,-50%) scale(1.2);opacity:1}}
+@keyframes gridMove{0%{background-position:0 0}100%{background-position:40px 40px}}
+.loader-logo{position:relative;z-index:2;display:flex;align-items:center;gap:14px;margin-bottom:40px}
+.loader-logo i{font-size:48px;background:linear-gradient(135deg,#3373ff,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:logoFloat 2s ease-in-out infinite}
+.loader-logo span{font-size:32px;font-weight:800;color:#fff;letter-spacing:2px}
+@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.loader-progress-wrap{position:relative;z-index:2;width:320px;max-width:80vw}
+.loader-progress-bar{width:100%;height:6px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden;position:relative}
+.loader-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#3373ff,#8b5cf6,#ec4899);border-radius:99px;transition:width .3s ease;position:relative;box-shadow:0 0 20px rgba(51,115,255,.6)}
+.loader-progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.loader-progress-info{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.loader-percent{font-size:24px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.loader-tip{font-size:13px;color:rgba(255,255,255,.5);margin-top:24px;text-align:center;z-index:2;position:relative;min-height:20px;transition:opacity .3s}
+.loader-hide{opacity:0!important;visibility:hidden!important;pointer-events:none}
+</style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans transition-colors duration-300">
 
 <!-- ===== 全局加载动画 ===== -->
-<div id="globalLoader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-white dark:bg-slate-900">
-  <div class="loader-circle"></div>
-  <p class="ml-4 text-brand-500 font-medium">极智云加载中...</p>
+<div id="globalLoader">
+  <div class="loader-logo">
+    <i class="fa-solid fa-cube"></i>
+    <span>极智云</span>
+  </div>
+  <div class="loader-progress-wrap">
+    <div class="loader-progress-bar">
+      <div class="loader-progress-fill" id="loaderFill"></div>
+    </div>
+    <div class="loader-progress-info">
+      <span style="color:rgba(255,255,255,.4);font-size:12px;">正在加载资源</span>
+      <span class="loader-percent" id="loaderPercent">0%</span>
+    </div>
+  </div>
+  <div class="loader-tip" id="loaderTip">正在初始化引擎...</div>
 </div>
 
 <!-- ===== 导航栏 ===== -->
@@ -118,6 +152,38 @@
 
 <!-- ===== 初始化 ===== -->
 <script>
+/* ===== 加载进度条控制器 ===== */
+(function() {
+  var fill = document.getElementById('loaderFill');
+  var percentEl = document.getElementById('loaderPercent');
+  var tipEl = document.getElementById('loaderTip');
+  var progress = 0;
+  var timer = null;
+  var tips = ['正在初始化引擎...','正在加载核心模块...','正在连接数据服务...','正在渲染界面组件...','即将完成，请稍候...'];
+  var tipIndex = 0;
+  function setProgress(p) { progress = Math.min(100, Math.max(0, p)); if (fill) fill.style.width = progress + '%'; if (percentEl) percentEl.textContent = Math.floor(progress) + '%'; }
+  function nextTip() { tipIndex = (tipIndex + 1) % tips.length; if (tipEl) { tipEl.style.opacity = '0'; setTimeout(function() { tipEl.textContent = tips[tipIndex]; tipEl.style.opacity = '1'; }, 300); } }
+  function simulate() {
+    if (progress >= 92) return;
+    var inc = progress < 30 ? Math.random() * 8 + 4 : progress < 60 ? Math.random() * 5 + 2 : Math.random() * 2 + 0.5;
+    setProgress(progress + inc);
+    if (Math.floor(progress / 20) !== tipIndex && progress < 90) nextTip();
+    timer = setTimeout(simulate, 200 + Math.random() * 300);
+  }
+  window.__loaderComplete = function() {
+    if (timer) clearTimeout(timer);
+    setProgress(100);
+    if (tipEl) tipEl.textContent = '加载完成！';
+    setTimeout(function() {
+      var loader = document.getElementById('globalLoader');
+      if (loader) loader.classList.add('loader-hide');
+      setTimeout(function() { if (loader) loader.style.display = 'none'; }, 600);
+    }, 400);
+  };
+  setTimeout(function() { if (progress < 100) window.__loaderComplete(); }, 8000);
+  simulate();
+})();
+
 document.addEventListener('DOMContentLoaded', function () {
   // 主题初始化
   const isDark = App.Store.get('darkMode') === 'true';
@@ -142,14 +208,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // 启动路由
   App.Router.init();
 
-  // 隐藏全局加载动画
-  setTimeout(() => {
-    const loader = document.getElementById('globalLoader');
-    if (loader) {
-      loader.style.opacity = '0';
-      setTimeout(() => loader.style.display = 'none', 300);
-    }
-  }, 500);
+  // 页面渲染完成，结束加载进度条
+  setTimeout(() => { if (window.__loaderComplete) window.__loaderComplete(); }, 800);
 
   // 回到顶部按钮显隐 + 导航栏吸顶
   window.addEventListener('scroll', function () {
@@ -165,15 +225,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 });
-
-// 兜底保护：最多 3 秒强制隐藏加载动画
-setTimeout(() => {
-  const loader = document.getElementById('globalLoader');
-  if (loader && loader.style.display !== 'none') {
-    loader.style.opacity = '0';
-    setTimeout(() => loader.style.display = 'none', 300);
-  }
-}, 3000);
 </script>
 <style>
 .back-to-blog{position:fixed;top:14px;left:14px;z-index:99999;background:rgba(26,26,46,.85);color:#fff;padding:7px 14px;border-radius:8px;text-decoration:none;font-size:12.5px;font-weight:600;font-family:-apple-system,'Segoe UI','Microsoft YaHei',sans-serif;backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.3);transition:all .2s;display:inline-flex;align-items:center;gap:4px}
