@@ -55,6 +55,10 @@
 #globalLoader.light-mode .loader-tip{color:rgba(0,0,0,.5)!important}
 #globalLoader.light-mode .loader-progress-info span:first-child{color:rgba(0,0,0,.4)!important}
 #globalLoader.light-mode .loader-theme-label{color:rgba(0,0,0,.6)!important}
+#globalLoader.light-mode .loader-progress-bar{background:rgba(0,0,0,.08)!important}
+#globalLoader.light-mode .loader-theme-btn{background:linear-gradient(135deg,rgba(51,115,255,.2),rgba(139,92,246,.2))!important;color:#3b3f5c!important;border-color:rgba(0,0,0,.25)!important}
+#globalLoader.light-mode .loader-theme-colors{background:rgba(255,255,255,.92)!important;border-color:rgba(0,0,0,.12)!important}
+#globalLoader.light-mode .loader-theme-color{border-color:rgba(0,0,0,.35)!important}
 </style>
 <style>
 /* 全局主题切换小太阳（固定右上角，始终可见） */
@@ -88,7 +92,7 @@ html[data-theme="light"] p{color:#3f4a63}
     <button class="loader-sun-btn" id="loaderSunBtn" title="切换浅色模式">☀️</button>
     <span class="loader-theme-label">切换主题</span>
     <button class="loader-theme-btn" id="loaderThemeBtn" title="切换背景色">🎨</button>
-    <div class="loader-theme-colors" id="loaderThemeColors"> id="loaderThemeColors">
+    <div class="loader-theme-colors" id="loaderThemeColors">
       <button class="loader-theme-color active" data-theme="deepspace" style="background:linear-gradient(135deg,#0f172a,#1e1b4b)" title="深空蓝"></button>
       <button class="loader-theme-color" data-theme="aurora" style="background:linear-gradient(135deg,#064e3b,#134e4a)" title="极光绿"></button>
       <button class="loader-theme-color" data-theme="sunset" style="background:linear-gradient(135deg,#7c2d12,#9a3412)" title="落日橙"></button>
