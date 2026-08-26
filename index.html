@@ -6,8 +6,18 @@
 <title>我的博客 · 记录与整理</title>
 <meta name="description" content="一个把个人工作台放进博客里的地方：写点文字，也把生活和工作整理成每天打开的一页。">
 <link rel="stylesheet" href="assets/css/blog.css">
+<style>
+.global-sun-btn{position:fixed;top:16px;right:16px;z-index:999999;width:42px;height:42px;border-radius:50%;border:2px solid rgba(255,200,50,.7);background:linear-gradient(135deg,#ffd700,#ff8c00);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 12px rgba(255,165,0,.5);transition:all .3s;animation:globalSunSpin 6s linear infinite}
+.global-sun-btn:hover{transform:scale(1.15) rotate(15deg);box-shadow:0 4px 20px rgba(255,165,0,.8);animation-play-state:paused}
+@keyframes globalSunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+body.theme-dark{filter:invert(1) hue-rotate(180deg)}
+body.theme-dark img,body.theme-dark video,body.theme-dark canvas,body.theme-dark iframe{filter:invert(1) hue-rotate(180deg)}
+body.theme-dark .global-sun-btn{filter:invert(1) hue-rotate(180deg)}
+</style>
 </head>
 <body>
+
+<button class="global-sun-btn" id="globalSunBtn" title="切换深色/浅色模式">☀️</button>
 
 <header class="site-header">
   <div class="nav-wrap">
@@ -158,7 +168,7 @@
       </div>
     </article>
 
-  </div>
+    </div>
 
   <!-- 关于 -->
   <h2 class="section-title" id="about">关于我</h2>
@@ -176,5 +186,17 @@
   <p>© 2026 我的博客 · 所有数据本地存储 · 不追踪、不收集</p>
 </footer>
 
+<script>
+(function(){
+  var btn=document.getElementById("globalSunBtn");
+  var isDark=localStorage.getItem("globalThemeDark")==="true";
+  if(isDark)document.body.classList.add("theme-dark");
+  if(btn)btn.addEventListener("click",function(e){
+    e.stopPropagation();
+    var dark=document.body.classList.toggle("theme-dark");
+    localStorage.setItem("globalThemeDark",dark?"true":"false");
+  });
+})();
+</script>
 </body>
 </html>
