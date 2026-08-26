@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>餐厅学生管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/fancy.css">
+    <script src="js/common.js"></script>
+    <script>
+        tailwind.config = {darkMode:'class'}
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    <div id="app">
+        <!--登录-->
+        <div id="login-box" class="min-h-screen flex items-center justify-center p-4">
+            <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-center mb-6">🍽️ 餐厅学生管理系统</h2>
+                <div class="mb-4">
+                    <label class="block mb-1">账号</label>
+                    <input id="login-user" class="w-full border dark:border-gray-600 rounded px-3 py-2 bg-transparent" placeholder="输入账号">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1">密码</label>
+                    <input id="login-pwd" type="password" class="w-full border dark:border-gray-600 rounded px-3 py-2 bg-transparent" placeholder="输入密码">
+                </div>
+                <button onclick="login()" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded mb-3">登录</button>
+                <button onclick="showRegister()" class="w-full border dark:border-gray-600 py-2 rounded">没有账号？去注册</button>
+                <div class="mt-3 flex justify-end">
+                    <button onclick="toggleTheme()">切换昼夜模式</button>
+                </div>
+            </div>
+        </div>
+
+        <!--注册-->
+        <div id="register-box" class="hidden min-h-screen flex items-center justify-center p-4">
+            <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-center mb-6">学生账号注册</h2>
+                <div class="mb-4">
+                    <label class="block mb-1">账号</label>
+                    <input id="reg-user" class="w-full border dark:border-gray-600 rounded px-3 py-2 bg-transparent" placeholder="创建账号">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1">密码</label>
+                    <input id="reg-pwd" type="password" class="w-full border dark:border-gray-600 rounded px-3 py-2 bg-transparent" placeholder="创建密码">
+                </div>
+                <button onclick="register()" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded mb-3">注册</button>
+                <button onclick="showLogin()" class="w-full border dark:border-gray-600 py-2 rounded">返回登录</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+function showRegister(){
+    document.getElementById("login-box").classList.add("hidden");
+    document.getElementById("register-box").classList.remove("hidden");
+}
+function showLogin(){
+    document.getElementById("register-box").classList.add("hidden");
+    document.getElementById("login-box").classList.remove("hidden");
+}
+
+function login(){
+    const u = document.getElementById("login-user").value.trim();
+    const p = document.getElementById("login-pwd").value.trim();
+    if(!u||!p){
+        alert("账号密码不能为空");
+        return;
+    }
+    //管理员
+    if(u === ADMIN_ACCOUNT && p === ADMIN_PWD){
+        localStorage.setItem("currentUser", ADMIN_ACCOUNT);
+        addLoginLog(u);
+        location.href="admin.html";
+        return;
+    }
+    //学生
+    const users = getUserList();
+    const stu = users.find(item=>item.username === u);
+    if(!stu){
+        alert("账号不存在");
+        return;
+    }
+    if(stu.password !== p){
+        alert("密码错误");
+        return;
+    }
+    localStorage.setItem("currentUser", u);
+    addLoginLog(u);
+    location.href="student.html";
+}
+
+function register(){
+    const u = document.getElementById("reg-user").value.trim();
+    const p = document.getElementById("reg-pwd").value.trim();
+    if(!u||!p){
+        alert("账号密码不能为空");
+        return;
+    }
+    if(u === ADMIN_ACCOUNT){
+        alert("该账号禁止注册！");
+        return;
+    }
+    const users = getUserList();
+    if(users.find(x=>x.username === u)){
+        alert("账号已存在");
+        return;
+    }
+    users.push({
+        username:u,
+        password:p,
+        avatar:"" //头像base64，初始空
+    });
+    saveUserList(users);
+    alert("注册成功，请登录");
+    showLogin();
+}
+</script>
+<style>
+.back-to-blog{position:fixed;top:14px;left:14px;z-index:99999;background:rgba(26,26,46,.85);color:#fff;padding:7px 14px;border-radius:8px;text-decoration:none;font-size:12.5px;font-weight:600;font-family:-apple-system,'Segoe UI','Microsoft YaHei',sans-serif;backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.3);transition:all .2s;display:inline-flex;align-items:center;gap:4px}
+.back-to-blog:hover{background:rgba(91,108,255,.92);transform:translateY(-1px);box-shadow:0 6px 18px rgba(91,108,255,.45)}
+</style>
+<a href="../../index.html" class="back-to-blog">← 返回博客</a>
+</body>
+</html>

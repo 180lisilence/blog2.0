@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>极智云 · 测试</title>
+<script src="assets/lib/tailwind/tailwindcss.js"></script>
+<script>
+  tailwind.config = { darkMode: 'class', theme: { extend: { colors: { brand: { 500:'#3373ff' } } } } }
+</script>
+<script src="assets/lib/fontawesome/all.min.js"></script>
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="../enhance.css">
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+
+<div id="globalLoader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-white dark:bg-slate-900">
+  <div class="loader-circle"></div>
+  <p class="ml-4 text-brand-500 font-medium">加载中...</p>
+</div>
+
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-slate-800 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+    <a href="#/home" class="flex items-center gap-2 font-bold text-lg">
+      <i class="fa-solid fa-cube text-brand-500 text-2xl"></i>
+      <span id="navLogo">极智云</span>
+    </a>
+    <div id="navMenu" class="hidden md:flex items-center gap-1"></div>
+    <div class="flex items-center gap-2">
+      <div id="navUser"></div>
+    </div>
+  </div>
+  <div id="mobileMenu" class="md:hidden hidden bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+    <div class="px-4 py-3 space-y-1" id="mobileMenuList"></div>
+  </div>
+</nav>
+
+<main id="app" class="pt-16 min-h-screen"></main>
+<footer id="footer" class="bg-slate-900 text-slate-400 py-8"></footer>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/components.js"></script>
+<script src="assets/js/router.js"></script>
+<script src="assets/js/pages/home.js"></script>
+<script src="assets/js/pages/user.js"></script>
+<script src="assets/js/pages/news.js"></script>
+<script src="assets/js/pages/shop.js"></script>
+<script src="assets/js/pages/admin.js"></script>
+
+<script>
+window.App = window.App || {};
+
+App.toggleTheme = function() {
+  var isDark = document.documentElement.classList.toggle('dark');
+  App.Store.set('darkMode', isDark);
+};
+
+App.setThemeColor = function(color) {
+  document.documentElement.style.setProperty('--brand-color', color);
+  App.Store.set('themeColor', color);
+};
+
+setTimeout(function() {
+  var loader = document.getElementById('globalLoader');
+  if (loader && loader.style.display !== 'none') {
+    loader.style.display = 'none';
+  }
+}, 3000);
+
+try {
+  var isDark = App.Store.get('darkMode') === 'true';
+  if (isDark) document.documentElement.classList.add('dark');
+  var themeColor = App.Store.get('themeColor') || '#3373ff';
+  App.setThemeColor(themeColor);
+  
+  App.Components.renderNavbar();
+  App.Components.renderFooter();
+  App.Router.init();
+  
+  setTimeout(function() {
+    var loader = document.getElementById('globalLoader');
+    if (loader) loader.style.display = 'none';
+  }, 500);
+} catch (e) {
+  document.getElementById('app').innerHTML = '<div style="padding:100px;text-align:center;color:red;"><h2>500 错误</h2><p>' + e.message + '</p><pre>' + e.stack + '</pre></div>';
+  document.getElementById('globalLoader').style.display = 'none';
+}
+</script>
+<style>
+.back-to-blog{position:fixed;top:14px;left:14px;z-index:99999;background:rgba(26,26,46,.85);color:#fff;padding:7px 14px;border-radius:8px;text-decoration:none;font-size:12.5px;font-weight:600;font-family:-apple-system,'Segoe UI','Microsoft YaHei',sans-serif;backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.3);transition:all .2s;display:inline-flex;align-items:center;gap:4px}
+.back-to-blog:hover{background:rgba(91,108,255,.92);transform:translateY(-1px);box-shadow:0 6px 18px rgba(91,108,255,.45)}
+</style>
+<a href="../../index.html" class="back-to-blog">← 返回博客</a>
+</body>
+</html>

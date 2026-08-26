@@ -1,0 +1,33 @@
+# 操作系统
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 日志
+*.log
+npm-debug.log*
+
+# 依赖（本项目无依赖，纯静态）
+node_modules/
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.old
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# 缓存
+.cache/
+.temp/
