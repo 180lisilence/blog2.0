@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>项目中心</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f5f7fa 0%, #eef1f7 100%);
+    }
+    header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    header .title { display: flex; align-items: center; gap: 12px; }
+    header .logo {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 18px;
+    }
+    header h1 { font-size: 20px; }
+    header .user { font-size: 14px; opacity: .9; }
+    .logout {
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.4);
+      color: #fff; padding: 8px 18px; border-radius: 10px;
+      cursor: pointer; font-size: 14px;
+      transition: background .2s;
+    }
+    .logout:hover { background: rgba(255,255,255,.3); }
+
+    main { max-width: 1080px; margin: 32px auto; padding: 0 24px; }
+    .welcome { margin-bottom: 22px; }
+    .welcome h2 { font-size: 22px; color: #1f2937; margin-bottom: 6px; }
+    .welcome p { color: #6b7280; font-size: 14px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.06);
+      border: 1px solid #eef0f5;
+      transition: transform .15s, box-shadow .15s;
+      text-decoration: none;
+      display: block;
+      color: inherit;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,.1); }
+    .card .c-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 14px;
+    }
+    .card h3 { font-size: 17px; color: #1f2937; margin-bottom: 6px; }
+    .card p { font-size: 13px; color: #6b7280; line-height: 1.6; }
+    .card .go { margin-top: 12px; font-size: 13px; color: #667eea; font-weight: 600; }
+
+    .c1 { background: #eef2ff; } .c2 { background: #ecfdf5; } .c3 { background: #fff7ed; }
+    .c4 { background: #fef2f2; } .c5 { background: #eff6ff; } .c6 { background: #faf5ff; }
+
+    .loading, .error {
+      text-align: center; color: #6b7280; padding: 60px 0; font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <div class="logo">M</div>
+    <h1>项目中心</h1>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <span class="user" id="currentUser"></span>
+    <button class="logout" onclick="doLogout()">退出登录</button>
+  </div>
+</header>
+
+<main>
+  <div class="welcome">
+    <h2 id="welcomeText">欢迎回来</h2>
+    <p>以下项目需要登录后使用，点击即可进入。</p>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<script>
+  /* =========================================================
+   * 项目列表配置：在这里添加/修改你的真实项目（名称、描述、链接、图标）
+   * 链接支持：局域网内其他服务 http://192.168.x.x:端口，或本服务下页面
+   * ========================================================= */
+  const PROJECTS = [
+    { name: "个人工作台", desc: "工作生活一体化本地管理应用：待办、开发、咨询、自媒体、健身、饮食、游戏、AI 对话", url: "/blog/workbench/index.html", icon: "🛠️", color: "c1" },
+    { name: "钢铁前线 · 狙击", desc: "二战写实 FPS 游戏（Three.js 3D），20+ 真实武器、10 大战役、AI 士兵、可驾驶坦克", url: "/blog/projects/steel-frontline/index.html", icon: "🎯", color: "c2" },
+    { name: "极智云 · 企业门户", desc: "企业级大型综合门户：营销门户、资讯管理、产品展示、订单、用户、后台运营工作台", url: "/blog/projects/jizhiyun-pro/index.html", icon: "☁️", color: "c3" },
+    { name: "我们的山头", desc: "我的世界（Minecraft）服务器官网，BE 版 + Java 版，含冒险探索和红石科技子页", url: "/blog/projects/shantou/index.html", icon: "⛏️", color: "c4" },
+    { name: "餐厅学生管理系统", desc: "面向餐厅场景的学生管理系统：首页、学生管理、后厨管理、管理员后台", url: "/blog/projects/restaurant/index.html", icon: "🍽️", color: "c5" },
+    { name: "Earth Online", desc: "交互式地球轨道设计器，实时 3D 可视化轨道参数", url: "/blog/projects/earth-online/index.html", icon: "🌍", color: "c6" },
+    { name: "博客首页", desc: "回到博客首页，浏览文章与全部项目", url: "/blog/", icon: "📖", color: "c1" }
+  ];
+
+  function getToken() {
+    const c = document.cookie.split(";").map(s => s.trim()).find(s => s.startsWith("web_token="));
+    return c ? decodeURIComponent(c.split("=").slice(1).join("=")) : "";
+  }
+
+  async function doLogout() {
+    const token = getToken();
+    try { await fetch("/api/logout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token }) }); } catch (e) {}
+    document.cookie = "web_token=; path=/; max-age=0";
+    document.cookie = "web_guest=; path=/; max-age=0";
+    location.href = "/login.html";
+  }
+
+  function renderGrid() {
+    const grid = document.querySelector("#grid");
+    grid.innerHTML = PROJECTS.map((p) => `
+      <a class="card" href="${p.url}" target="_blank" rel="noopener">
+        <div class="c-icon ${p.color || 'c1'}">${p.icon || '📁'}</div>
+        <h3>${p.name}</h3>
+        <p>${p.desc || ''}</p>
+        <div class="go">进入项目 →</div>
+      </a>
+    `).join("");
+  }
+
+  (async () => {
+    const main = document.querySelector("main");
+    try {
+      const r = await fetch("/api/me");
+      const d = await r.json();
+      if (d.ok) {
+        document.querySelector("#currentUser").innerText = "当前账号：" + d.username;
+        document.querySelector("#welcomeText").innerText = "欢迎回来，" + d.username;
+        renderGrid();
+      } else {
+        main.innerHTML = '<div class="error">登录已过期，正在跳转到登录页...</div>';
+        setTimeout(() => location.href = "/login.html", 1200);
+      }
+    } catch (e) {
+      main.innerHTML = '<div class="error">无法连接服务，请确认后台服务已启动</div>';
+    }
+  })();
+</script>
+</body>
+</html>

@@ -17,6 +17,12 @@ npm-debug.log*
 # 依赖（本项目无依赖，纯静态）
 node_modules/
 
+# 打包产物（本地 APP 打包用的压缩包，体积大且非源码，不上传）
+*.zip
+
+# 登录系统用户数据（含密码加盐哈希，属于本机数据，不应公开）
+qrcode-login/users.json
+
 # 临时文件
 *.tmp
 *.temp

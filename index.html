@@ -1,232 +1,305 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>我的博客 · 记录与整理</title>
-<meta name="description" content="一个把个人工作台放进博客里的地方：写点文字，也把生活和工作整理成每天打开的一页。">
-<link rel="stylesheet" href="assets/css/blog.css">
-<style>
-.global-sun-btn{position:fixed;top:16px;right:16px;z-index:999999;width:42px;height:42px;border-radius:50%;border:2px solid rgba(255,200,50,.7);background:linear-gradient(135deg,#ffd700,#ff8c00);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 12px rgba(255,165,0,.5);transition:all .3s;animation:globalSunSpin 6s linear infinite}
-.global-sun-btn:hover{transform:scale(1.15) rotate(15deg);box-shadow:0 4px 20px rgba(255,165,0,.8);animation-play-state:paused}
-@keyframes globalSunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>扫码登录 · 项目中心</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 420px;
+      max-width: 100%;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+      padding: 40px 36px 36px;
+      text-align: center;
+    }
+    .logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      color: #fff;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    h1 { font-size: 22px; color: #1f2937; margin-bottom: 6px; }
+    .sub { font-size: 13px; color: #9ca3af; margin-bottom: 24px; }
+
+    .qr-wrap {
+      position: relative;
+      width: 260px;
+      height: 260px;
+      margin: 0 auto 20px;
+      border-radius: 18px;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    }
+    #qrImg { width: 100%; height: 100%; border-radius: 10px; display: block; }
+    .qr-mask {
+      position: absolute;
+      inset: 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #4b5563;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    .qr-mask.show { opacity: 1; }
+
+    .status {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 15px;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; }
+    .dot.pending { background: #f59e0b; animation: pulse 1.2s infinite; }
+    .dot.scanned { background: #3b82f6; animation: pulse 1.2s infinite; }
+    .dot.confirmed { background: #10b981; }
+    .dot.expired, .dot.invalid { background: #ef4444; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+    .countdown { font-size: 12px; color: #9ca3af; }
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 18px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .step { display: flex; align-items: center; gap: 4px; }
+    .step i { width: 18px; height: 18px; border-radius: 50%; background: #e5e7eb; color: #fff; font-style: normal; font-size: 11px; line-height: 18px; }
+    .step.active i { background: #667eea; }
+    .step.done i { background: #10b981; }
+    .footer { margin-top: 18px; font-size: 12px; color: #c3c7d1; }
+    .tip-bar {
+      font-size: 13px;
+      color: #6b7280;
+      background: #f3f4f6;
+      border-radius: 10px;
+      padding: 10px 14px;
+      line-height: 1.6;
+      text-align: left;
+    }
+    .guest-btn {
+      margin-top: 14px;
+      width: 100%;
+      padding: 12px;
+      border: 1px dashed #c3c7d1;
+      border-radius: 12px;
+      background: #fff;
+      color: #9ca3af;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .guest-btn:hover { color: #4f46e5; border-color: #667eea; background: #f5f7ff; }
+  </style>
 </head>
 <body>
+<div class="card">
+  <div class="logo">M</div>
+  <h1>扫码登录</h1>
+  <div class="sub">请使用手机扫码，登录后可进入项目中心</div>
 
-<button class="global-sun-btn" id="globalSunBtn" title="切换深色/浅色模式">☀️</button>
-
-<header class="site-header">
-  <div class="nav-wrap">
-    <a href="index.html" class="brand"><span class="dot"></span>我的博客</a>
-    <nav class="nav-links">
-      <a href="index.html" class="active">首页</a>
-      <a href="index.html#posts">文章</a>
-      <a href="index.html#projects">项目</a>
-      <a href="workbench/index.html">工作台</a>
-      <a href="index.html#about">关于</a>
-    </nav>
-  </div>
-</header>
-
-<section class="hero">
-  <h1>你好，欢迎来到<span class="accent">我的博客</span>。</h1>
-  <p>这里写点日常、记录和整理。除了文章，我还把「个人工作台」搬了进来——待办、开发、咨询、自媒体、健身、饮食、游戏，所有数据都存在你自己的浏览器里，不上传任何云端。</p>
-  <div class="meta">
-    <span>📝 记录生活与工作</span>
-    <span>💻 开发 · 咨询 · 自媒体</span>
-    <span>🏋️ 健身 · 饮食 · 游戏</span>
-    <span>🤖 内置 AI 对话</span>
-  </div>
-</section>
-
-<main class="container">
-
-  <!-- 工作台入口 -->
-  <div class="workbench-card">
-    <div>
-      <h3>🛠️ 我的个人工作台</h3>
-      <p>每天打开先看「今天该干什么、什么快到期、该跟进了」。所有数据本地存储，不上传云端，点开即用。</p>
-    </div>
-    <a class="go-btn" href="workbench/index.html">进入工作台 →</a>
-  </div>
-
-  <!-- 最新文章 -->
-  <h2 class="section-title" id="posts">最新文章</h2>
-  <div class="post-grid">
-    <article class="post-card">
-      <span class="tag">碎碎念</span>
-      <h3><a href="posts/hello-world.html">你好，博客的第一篇</a></h3>
-      <p>为什么我会把一个工作台放进博客里——一点动机，一点取舍。</p>
-      <span class="date">📅 2026-08-26</span>
-    </article>
-    <article class="post-card">
-      <span class="tag">工具</span>
-      <h3><a href="posts/workbench-intro.html">我的个人工作台长什么样</a></h3>
-      <p>待办、开发、咨询、自媒体、健身、饮食、游戏、AI——八个模块怎么组织成每天打开的一页。</p>
-      <span class="date">📅 2026-08-26</span>
-    </article>
-    <article class="post-card">
-      <span class="tag">整理</span>
-      <h3><a href="posts/data-local-first.html">为什么所有数据都放在本地</a></h3>
-      <p>没有账号、没有云端同步的取舍，以及数据备份和导入导出的玩法。</p>
-      <span class="date">📅 2026-08-26</span>
-    </article>
-  </div>
-
-  <!-- 我的项目 -->
-  <h2 class="section-title" id="projects">我的项目</h2>
-  <div class="project-grid">
-
-    <article class="project-card">
-      <div class="proj-icon">🛠️</div>
-      <h3><a href="workbench/index.html">个人工作台</a></h3>
-      <p>工作生活一体化本地管理应用。待办、开发、咨询、自媒体、健身、饮食、游戏、AI 对话整合到一个界面，数据完全本地存储。提供 PC 桌面版（Electron）和 Android 移动端（WebView 封装 APK）。</p>
-      <div class="proj-tags">
-        <span class="proj-tag">Electron</span>
-        <span class="proj-tag">Android</span>
-        <span class="proj-tag">原生 JS</span>
-        <span class="proj-tag">本地存储</span>
-      </div>
-      <div class="proj-links">
-        <a href="workbench/index.html">🖥️ 在线使用</a>
-      </div>
-    </article>
-
-    <article class="project-card">
-      <div class="proj-icon">🎯</div>
-      <h3><a href="projects/steel-frontline/index.html">钢铁前线 · 狙击</a></h3>
-      <p>二战写实 FPS 游戏。Electron + Three.js 打造的纯前端 3D 射击游戏，20+ 真实二战武器（Kar98k、M1 加兰德、MG42、MP40…），10 大战役，6 大阵营，占点 + 兵力制模式，AI 智能士兵（巡逻/交战/包抄/掩体/推进），可驾驶坦克。</p>
-      <div class="proj-tags">
-        <span class="proj-tag">Three.js</span>
-        <span class="proj-tag">Electron</span>
-        <span class="proj-tag">3D FPS</span>
-        <span class="proj-tag">AI 士兵</span>
-      </div>
-      <div class="proj-links">
-        <a href="projects/steel-frontline/index.html">📖 项目详情</a>
-      </div>
-    </article>
-
-    <article class="project-card">
-      <div class="proj-icon">☁️</div>
-      <h3><a href="projects/jizhiyun-pro/index.html">极智云 · 企业级综合门户</a></h3>
-      <p>企业级大型综合门户网站系统。前端 SPA + Node.js Express 后端 + JSON 模拟数据库，包含营销门户、资讯管理、产品展示、订单、用户、后台运营工作台等模块。前端可直接在浏览器运行。</p>
-      <div class="proj-tags">
-        <span class="proj-tag">Tailwind</span>
-        <span class="proj-tag">SPA</span>
-        <span class="proj-tag">企业门户</span>
-      </div>
-      <div class="proj-links">
-        <a href="projects/jizhiyun-pro/index.html">🖥️ 企业版</a>
-        <a href="projects/jizhiyun-demo/index.html">🖥️ 测试版</a>
-      </div>
-    </article>
-
-    <article class="project-card">
-      <div class="proj-icon">⛏️</div>
-      <h3><a href="projects/shantou/index.html">我们的山头 · 我的世界服务器</a></h3>
-      <p>我的世界（Minecraft）服务器官网。团队展示、建筑展示（主城堡、自然风光区、红石基地）、成员介绍、兴趣爱好、服务器信息与联系方式。含冒险探索和红石科技两个子页面。BE 版 1.21.0.x。</p>
-      <div class="proj-tags">
-        <span class="proj-tag">Minecraft</span>
-        <span class="proj-tag">服务器官网</span>
-        <span class="proj-tag">HTML</span>
-      </div>
-      <div class="proj-links">
-        <a href="projects/shantou/index.html">🖥️ BE版官网</a>
-        <a href="projects/shantou2/index.html">🖥️ Java版</a>
-      </div>
-    </article>
-
-    <article class="project-card">
-      <div class="proj-icon">🍽️</div>
-      <h3><a href="projects/restaurant/index.html">餐厅学生管理系统</a></h3>
-      <p>面向餐厅场景的学生管理系统，包含首页、学生管理、后厨管理、管理员后台四个页面，纯 HTML + CSS + JS 前端实现。</p>
-      <div class="proj-tags">
-        <span class="proj-tag">HTML</span>
-        <span class="proj-tag">管理系统</span>
-      </div>
-      <div class="proj-links">
-        <a href="projects/restaurant/index.html">🖥️ 在线预览</a>
-      </div>
-    </article>
-
-    <article class="project-card">
-      <div class="proj-icon">🌍</div>
-      <h3><a href="projects/earth-online/index.html">Earth Online</a></h3>
-      <p>地球轨道设计可视化项目。包含交互式地球轨道设计器（可调整轨道参数并实时 3D 可视化）和封面展示页面，配有背景音乐和图片资源。</p>
-      <div class="proj-tags">
-        <span class="proj-tag">HTML</span>
-        <span class="proj-tag">3D 可视化</span>
-        <span class="proj-tag">轨道设计</span>
-      </div>
-      <div class="proj-links">
-        <a href="projects/earth-online/index.html">🖥️ 在线预览</a>
-      </div>
-    </article>
-
-    </div>
-
-  <!-- 关于 -->
-  <h2 class="section-title" id="about">关于我</h2>
-  <div class="about">
-    <div class="avatar">我</div>
-    <div>
-      <h4>一名爱折腾的开发者</h4>
-      <p>平时做点开发、接点咨询、写写自媒体，也练练健身、记记饮食、打打游戏。做过个人工作台（PC + Android）、二战 FPS 游戏《钢铁前线·狙击》、企业门户「极智云」、我的世界服务器「我们的山头」等项目。这个博客是把这些东西放在同一个屋檐下的地方——文章写给想看的人，工作台只给自己用。</p>
+  <div class="qr-wrap">
+    <img id="qrImg" alt="二维码" />
+    <div class="qr-mask" id="qrMask">
+      <div style="font-size:40px" id="maskIcon">✅</div>
+      <div id="maskText">登录成功</div>
     </div>
   </div>
 
-</main>
+  <div class="status">
+    <span class="dot" id="dot"></span>
+    <span id="tip">正在加载二维码...</span>
+  </div>
+  <div class="countdown" id="countdown"></div>
 
-<footer class="site-footer">
-  <p>© 2026 我的博客 · 所有数据本地存储 · 不追踪、不收集</p>
-</footer>
+  <div class="steps" id="steps">
+    <div class="step" id="st1"><i>1</i> 扫码</div>
+    <div class="step" id="st2"><i>2</i> 手机确认</div>
+    <div class="step" id="st3"><i>3</i> 进入系统</div>
+  </div>
+
+  <div class="tip-bar">
+    💡 手机扫码后，使用<strong>自己注册的账号</strong>登录；没有账号可在手机页直接注册。
+  </div>
+
+  <button class="guest-btn" onclick="guestEnter()" title="无法启动后台服务时，跳过登录直接进入博客（访客模式）">
+    ⚡ 无法连接服务？点此直接进入博客
+  </button>
+</div>
 
 <script>
-(function(){
-  var html=document.documentElement;
-  var btn=document.getElementById("globalSunBtn");
-  function setTheme(t){
-    html.setAttribute("data-theme", t);
-    if(btn)btn.textContent = t==="light" ? "🌙" : "☀️";
+  let qid = null;
+  let pollTimer = null;
+  let countdownTimer = null;
+  let expireAt = 0;
+
+  // 兜底入口：无法启动后台服务时，跳过登录直接进入博客（访客模式）
+  function guestEnter() {
+    // 写访客标记：服务端在跑时凭此放行 /blog；本地打包(无服务)时不影响
+    try { document.cookie = "web_guest=1; path=/; max-age=604800; SameSite=Lax"; } catch (e) {}
+    // 用相对路径跳转：服务端下解析为 /blog/index.html，本地/APP 打包下直接打开本地 blog/index.html
+    location.href = "blog/index.html";
   }
-  var saved=localStorage.getItem("globalTheme");
-  if(saved==="light"||saved==="dark"){ setTheme(saved); }
-  else { setTheme(window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"); }
-  if(btn)btn.addEventListener("click",function(e){
-    e.stopPropagation();
-    var cur=(html.getAttribute("data-theme")==="light")?"light":"dark";
-    var next=cur==="light"?"dark":"light";
-    setTheme(next);
-    localStorage.setItem("globalTheme", next);
-  });
-})();
-</script>
-<!-- sun-drag -->
-<style>
-.global-sun-btn{cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none}
-.global-sun-btn.dragging{cursor:grabbing;transition:none!important;animation-play-state:paused!important;box-shadow:0 8px 24px rgba(255,165,0,.85)!important}
-</style>
-<script>
-(function(){
-  var btn=document.getElementById("globalSunBtn");
-  if(!btn)return;
-  btn.title="切换主题 · 按住可拖动位置";
-  var KEY="globalSunPos",x=null,y=null;
-  try{var s=localStorage.getItem(KEY);if(s){var p=JSON.parse(s);if(typeof p.x==="number"&&typeof p.y==="number"){x=p.x;y=p.y;}}}catch(e){}
-  function clamp(){var w=btn.offsetWidth||42,h=btn.offsetHeight||42;x=Math.max(0,Math.min(x,window.innerWidth-w));y=Math.max(0,Math.min(y,window.innerHeight-h));}
-  function render(noAnim){if(x===null||y===null)return;clamp();if(noAnim)btn.style.transition="none";btn.style.left=x+"px";btn.style.top=y+"px";btn.style.right="auto";btn.style.bottom="auto";if(noAnim)requestAnimationFrame(function(){btn.style.transition="";});}
-  render(true);
-  window.addEventListener("resize",function(){if(x!==null&&y!==null)render(false);});
-  var dragging=false,moved=false,sx=0,sy=0,ox=0,oy=0;
-  btn.addEventListener("pointerdown",function(e){dragging=true;moved=false;if(btn.setPointerCapture)btn.setPointerCapture(e.pointerId);btn.classList.add("dragging");sx=e.clientX;sy=e.clientY;var r=btn.getBoundingClientRect();ox=r.left;oy=r.top;x=ox;y=oy;});
-  btn.addEventListener("pointermove",function(e){if(!dragging)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)>4||Math.abs(dy)>4)moved=true;x=ox+dx;y=oy+dy;render(false);});
-  function end(){if(!dragging)return;dragging=false;btn.classList.remove("dragging");try{localStorage.setItem(KEY,JSON.stringify({x:x,y:y}));}catch(e){}}
-  btn.addEventListener("pointerup",end);
-  btn.addEventListener("pointercancel",end);
-  btn.addEventListener("click",function(e){if(moved){e.stopPropagation();e.preventDefault();moved=false;}},true);
-})();
+
+  async function initQr() {
+    clearInterval(pollTimer);
+    clearInterval(countdownTimer);
+    hideMask();
+    setStatus("正在加载二维码...", "pending");
+    try {
+      const resp = await fetch("/api/qrcode/generate");
+      const data = await resp.json();
+      if (!data.qid) throw new Error("生成失败");
+      qid = data.qid;
+      expireAt = Date.now() + data.expireSeconds * 1000;
+      document.querySelector("#qrImg").src = data.qrBase64;
+      document.querySelector("#qrImg").style.opacity = "1";
+      resetSteps();
+      startCountdown(data.expireSeconds);
+      startPoll();
+    } catch (e) {
+      setStatus("二维码加载失败，请检查服务是否启动", "invalid");
+    }
+  }
+
+  function setStatus(text, cls) {
+    const dot = document.querySelector("#dot");
+    dot.className = "dot " + cls;
+    document.querySelector("#tip").innerText = text;
+  }
+
+  function hideMask() {
+    document.querySelector("#qrMask").classList.remove("show");
+  }
+  function showMask(icon, text) {
+    document.querySelector("#maskIcon").innerText = icon;
+    document.querySelector("#maskText").innerText = text;
+    document.querySelector("#qrMask").classList.add("show");
+  }
+
+  function setStep(i, cls) {
+    document.querySelector("#st" + i).className = "step " + cls;
+  }
+  function resetSteps() {
+    setStep(1, "active"); setStep(2, ""); setStep(3, "");
+  }
+
+  function startCountdown(seconds) {
+    let left = seconds;
+    document.querySelector("#countdown").innerText = `二维码 ${left}s 后过期`;
+    countdownTimer = setInterval(() => {
+      left--;
+      if (left < 0) {
+        clearInterval(countdownTimer);
+        document.querySelector("#countdown").innerText = "";
+        return;
+      }
+      document.querySelector("#countdown").innerText = `二维码 ${left}s 后过期`;
+    }, 1000);
+  }
+
+  function startPoll() {
+    clearInterval(pollTimer);
+    pollTimer = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/qrcode/check?qid=${qid}`);
+        const ret = await res.json();
+        switch (ret.status) {
+          case "pending":
+            setStatus("等待手机扫码", "pending");
+            break;
+          case "scanned":
+            setStatus("已扫码！请在手机页面确认登录", "scanned");
+            setStep(1, "done"); setStep(2, "active");
+            break;
+          case "confirmed":
+            clearInterval(pollTimer);
+            clearInterval(countdownTimer);
+            setStatus("登录成功，正在进入系统...", "confirmed");
+            setStep(1, "done"); setStep(2, "done"); setStep(3, "active");
+            showMask("✅", "登录成功");
+            // 写入登录 Cookie（服务端凭此放行博客全部页面），并进入站点
+            document.cookie = "web_token=" + encodeURIComponent(ret.webToken) + "; path=/; max-age=604800; SameSite=Lax";
+            setTimeout(() => { location.href = "/blog/"; }, 900);
+            break;
+          case "expired":
+            clearInterval(pollTimer);
+            setStatus("二维码已过期，正在刷新...", "expired");
+            setTimeout(initQr, 1200);
+            break;
+          case "invalid":
+            clearInterval(pollTimer);
+            setStatus("会话无效，正在刷新...", "invalid");
+            setTimeout(initQr, 1200);
+            break;
+        }
+      } catch (e) { /* 忽略瞬时网络错误 */ }
+    }, 1100);
+  }
+
+  // 若已登录过（Cookie 有效），直接进入站点
+  (async () => {
+    try {
+      const r = await fetch("/api/me");
+      const d = await r.json();
+      if (d.ok) {
+        // 显示已登录状态，可直接进入系统或切换账号
+        const bar = document.createElement("div");
+        bar.style.cssText = "margin-bottom:18px;padding:12px 14px;border-radius:12px;background:#ecfdf5;color:#047857;font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;";
+        bar.innerHTML = '<span>✅ 已登录：<b>' + d.username + '</b>（7 天内免登录）</span>';
+        const wrap = document.createElement("div");
+        wrap.style.cssText = "display:flex;gap:8px;";
+        wrap.innerHTML = '<button id="goIn" style="border:none;background:#10b981;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;">进入系统</button>' +
+                         '<button id="switchAcc" style="border:1px solid #d1d5db;background:#fff;color:#374151;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;">退出 / 换账号</button>';
+        bar.appendChild(wrap);
+        document.querySelector(".card").insertBefore(bar, document.querySelector(".logo"));
+        document.querySelector("#goIn").onclick = () => { location.href = "/blog/"; };
+        document.querySelector("#switchAcc").onclick = async () => {
+          const cur = document.cookie.split(";").map(s => s.trim()).find(s => s.startsWith("web_token="));
+          const t = cur ? decodeURIComponent(cur.split("=").slice(1).join("=")) : "";
+          try { await fetch("/api/logout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: t }) }); } catch (e) {}
+          document.cookie = "web_token=; path=/; max-age=0";
+          document.cookie = "web_guest=; path=/; max-age=0";
+          location.reload();
+        };
+        return;
+      }
+    } catch (e) {}
+    initQr();
+  })();
 </script>
 </body>
 </html>
