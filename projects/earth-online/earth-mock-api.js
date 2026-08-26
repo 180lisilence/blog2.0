@@ -48,12 +48,12 @@
   ];
 
   var NPC_LIST = [
-    { id: 'npc_lin', name: '林小雨', gender: 'female', age: 22, job: '学生', personality: '温柔善良', avatar: '👩' },
-    { id: 'npc_zhang', name: '张大力', gender: 'male', age: 25, job: '打工人', personality: '豪爽直率', avatar: '👨' },
-    { id: 'npc_wang', name: '王医生', gender: 'male', age: 35, job: '医生', personality: '严谨负责', avatar: '👨‍⚕️' },
-    { id: 'npc_li', name: '李厨师', gender: 'female', age: 28, job: '厨师', personality: '热情开朗', avatar: '👩‍🍳' },
-    { id: 'npc_chen', name: '陈老板', gender: 'male', age: 40, job: '老板', personality: '精明干练', avatar: '🧑‍💼' },
-    { id: 'npc_zhao', name: '赵工', gender: 'male', age: 30, job: '工程师', personality: '沉默寡言', avatar: '👨‍🔧' }
+    { npcId: 'npc_lin', id: 'npc_lin', name: '林小雨', gender: 'female', age: 22, job: '学生', personality: '温柔善良', avatar: '👩', description: '温柔善良的大学生，喜欢阅读和音乐' },
+    { npcId: 'npc_zhang', id: 'npc_zhang', name: '张大力', gender: 'male', age: 25, job: '打工人', personality: '豪爽直率', avatar: '👨', description: '豪爽直率的打工人，喜欢运动和聚会' },
+    { npcId: 'npc_wang', id: 'npc_wang', name: '王医生', gender: 'male', age: 35, job: '医生', personality: '严谨负责', avatar: '👨‍⚕️', description: '严谨负责的医生，医术精湛' },
+    { npcId: 'npc_li', id: 'npc_li', name: '李厨师', gender: 'female', age: 28, job: '厨师', personality: '热情开朗', avatar: '👩‍🍳', description: '热情开朗的厨师，做得一手好菜' },
+    { npcId: 'npc_chen', id: 'npc_chen', name: '陈老板', gender: 'male', age: 40, job: '老板', personality: '精明干练', avatar: '🧑‍💼', description: '精明干练的商人，事业有成' },
+    { npcId: 'npc_zhao', id: 'npc_zhao', name: '赵工', gender: 'male', age: 30, job: '工程师', personality: '沉默寡言', avatar: '👨‍🔧', description: '沉默寡言的工程师，技术大牛' }
   ];
 
   var SHOP_ITEMS = [
@@ -498,26 +498,77 @@
     'GET /api/npc/relations': function() {
       var uid = getCurrentUserId();
       var rels = npcRelDB.get();
-      return ok(rels[uid] || {});
+      var userRels = rels[uid] || {};
+      var list = [];
+      for (var npcId in userRels) {
+        var npc = NPC_LIST.find(function(n) { return n.npcId === npcId || n.id === npcId; });
+        if (!npc) continue;
+        var r = userRels[npcId];
+        var affinity = typeof r === 'object' ? (r.affinity || 0) : (r || 0);
+        var talkCount = typeof r === 'object' ? (r.talkCount || 0) : 0;
+        var relationLabel = affinity >= 800 ? '恋人' : affinity >= 500 ? '好友' : affinity >= 200 ? '熟人' : '陌生人';
+        list.push({
+          npcId: npc.npcId,
+          npcName: npc.name,
+          npcAvatar: npc.avatar,
+          relationLabel: relationLabel,
+          talkCount: talkCount,
+          affinity: affinity,
+          canPropose: affinity >= 800
+        });
+      }
+      return ok(list);
     },
     'POST /api/npc/talk': function(body) {
       var uid = getCurrentUserId();
       var rels = npcRelDB.get();
       if (!rels[uid]) rels[uid] = {};
-      rels[uid][body.npcId] = (rels[uid][body.npcId] || 0) + 10;
+      var npcId = body.npcId;
+      if (!rels[uid][npcId] || typeof rels[uid][npcId] !== 'object') {
+        rels[uid][npcId] = { affinity: rels[uid][npcId] || 0, talkCount: 0 };
+      }
+      rels[uid][npcId].affinity += 10;
+      rels[uid][npcId].talkCount += 1;
       npcRelDB.set(rels);
-      var npc = NPC_LIST.find(function(n) { return n.id === body.npcId; });
-      var replies = ['你好呀！', '今天过得怎么样？', '很高兴见到你~', '有空一起出去玩吗？', '你看起来气色不错！'];
-      return ok({ reply: replies[Math.floor(Math.random() * replies.length)], relation: rels[uid][body.npcId], npc: npc });
+      var npc = NPC_LIST.find(function(n) { return n.npcId === npcId || n.id === npcId; });
+      var replies = ['你好呀！', '今天过得怎么样？', '很高兴见到你~', '有空一起出去玩吗？', '你看起来气色不错！', '最近在忙什么呢？'];
+      var dialogue = replies[Math.floor(Math.random() * replies.length)];
+      var affinity = rels[uid][npcId].affinity;
+      var relationLabel = affinity >= 800 ? '恋人' : affinity >= 500 ? '好友' : affinity >= 200 ? '熟人' : '陌生人';
+      return ok({
+        npcAvatar: npc ? npc.avatar : '👤',
+        npcName: npc ? npc.name : '未知',
+        dialogue: dialogue,
+        affinityChange: 10,
+        currentAffinity: affinity,
+        relationLabel: relationLabel
+      });
     },
     'POST /api/npc/gift': function(body) {
       var uid = getCurrentUserId();
+      var wallet = getWallet();
+      if (wallet.gold < 50) return fail('金币不足，送礼需要50金币');
+      wallet.gold -= 50;
+      saveWallet(wallet);
       var rels = npcRelDB.get();
       if (!rels[uid]) rels[uid] = {};
-      var gain = body.value ? Math.floor(body.value / 10) : 20;
-      rels[uid][body.npcId] = (rels[uid][body.npcId] || 0) + gain;
+      var npcId = body.npcId;
+      if (!rels[uid][npcId] || typeof rels[uid][npcId] !== 'object') {
+        rels[uid][npcId] = { affinity: rels[uid][npcId] || 0, talkCount: 0 };
+      }
+      rels[uid][npcId].affinity += 30;
       npcRelDB.set(rels);
-      return ok({ relation: rels[uid][body.npcId], gain: gain });
+      var npc = NPC_LIST.find(function(n) { return n.npcId === npcId || n.id === npcId; });
+      var dialogues = ['谢谢你的礼物！', '哇，我很喜欢！', '你真是太贴心了~', '这个礼物真不错！', '我会好好珍藏的！'];
+      var dialogue = dialogues[Math.floor(Math.random() * dialogues.length)];
+      var affinity = rels[uid][npcId].affinity;
+      return ok({
+        npcAvatar: npc ? npc.avatar : '👤',
+        npcName: npc ? npc.name : '未知',
+        dialogue: dialogue,
+        affinityChange: 30,
+        currentAffinity: affinity
+      });
     },
 
     // 商店
