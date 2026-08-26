@@ -17,9 +17,7 @@
 .global-sun-btn:hover{transform:scale(1.15) rotate(15deg);box-shadow:0 4px 20px rgba(255,165,0,.8);animation-play-state:paused}
 @keyframes globalSunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 /* 浅色模式：清晰的浅背景 + 深文字（替代 filter 反转，保证对比度） */
-html[data-theme="light"] body{background:#eef1f6;color:#1a1f36}
-html[data-theme="light"] h1,html[data-theme="light"] h2,html[data-theme="light"] h3{color:#1a1f36;-webkit-text-fill-color:#1a1f36}
-html[data-theme="light"] p{color:#3f4a63}
+
 </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
@@ -271,18 +269,10 @@ try {
 <a href="../../index.html" class="back-to-blog">← 返回博客</a>
 <script>
 (function(){
-  var html=document.documentElement;
   var btn=document.getElementById("globalSunBtn");
-  function setTheme(t){ html.setAttribute("data-theme", t); }
-  var saved=localStorage.getItem("globalTheme");
-  if(saved==="light"||saved==="dark"){ setTheme(saved); }
-  else { setTheme(window.matchMedia("(prefers-color-scheme: light)").matches ? "light":"dark"); }
   if(btn)btn.addEventListener("click",function(e){
     e.stopPropagation();
-    var cur=(html.getAttribute("data-theme")==="light")?"light":"dark";
-    var next=cur==="light"?"dark":"light";
-    setTheme(next);
-    localStorage.setItem("globalTheme", next);
+    if(window.App && App.toggleTheme) App.toggleTheme();
   });
 })();
 </script>

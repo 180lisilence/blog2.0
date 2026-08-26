@@ -73,8 +73,10 @@
 @keyframes globalSunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 /* 浅色模式：清晰的浅背景 + 深文字（替代 filter 反转，保证对比度） */
 html[data-theme="light"] body{background:#eef1f6;color:#1a1f36}
-html[data-theme="light"] h1,html[data-theme="light"] h2,html[data-theme="light"] h3{color:#1a1f36;-webkit-text-fill-color:#1a1f36}
-html[data-theme="light"] p{color:#3f4a63}
+html[data-theme="light"] h1,html[data-theme="light"] h2,html[data-theme="light"] h3{color:#1a1f36}
+html[data-theme="light"] p{color:#3f4a63 !important}
+html[data-theme="light"] .wrap h1{background:none;-webkit-text-fill-color:#1a1f36}
+html[data-theme="light"] .btn-ghost{background:rgba(0,0,0,.04);color:#3f4a63;border:1px solid rgba(0,0,0,.18)}
 </style>
 </head>
 <body>
