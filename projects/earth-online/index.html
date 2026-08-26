@@ -36,14 +36,17 @@
 .loader-percent{font-size:24px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
 .loader-tip{font-size:13px;color:rgba(255,255,255,.5);margin-top:24px;text-align:center;z-index:2;position:relative;min-height:20px;transition:opacity .3s}
 .loader-hide{opacity:0!important;visibility:hidden!important;pointer-events:none}
-.loader-theme-switcher{position:absolute;bottom:30px;right:30px;z-index:10}
-.loader-theme-btn{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;backdrop-filter:blur(10px);font-size:16px}
-.loader-theme-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.1)}
-.loader-theme-colors{position:absolute;bottom:50px;right:0;display:flex;gap:8px;padding:10px;border-radius:12px;background:rgba(0,0,0,.4);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);opacity:0;visibility:hidden;transform:translateY(10px);transition:all .3s}
+.loader-theme-switcher{position:absolute;bottom:40px;right:40px;z-index:10;display:flex;align-items:center;gap:10px}
+.loader-theme-btn{width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.4);background:linear-gradient(135deg,rgba(51,115,255,.3),rgba(139,92,246,.3));color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;backdrop-filter:blur(10px);font-size:20px;box-shadow:0 0 20px rgba(51,115,255,.4);animation:btnPulse 2s ease-in-out infinite}
+.loader-theme-btn:hover{background:linear-gradient(135deg,rgba(51,115,255,.5),rgba(139,92,246,.5));transform:scale(1.1);box-shadow:0 0 30px rgba(51,115,255,.6)}
+@keyframes btnPulse{0%,100%{box-shadow:0 0 20px rgba(51,115,255,.4)}50%{box-shadow:0 0 35px rgba(139,92,246,.7)}}
+.loader-theme-label{color:rgba(255,255,255,.7);font-size:13px;font-weight:500;letter-spacing:1px;animation:labelFade 2s ease-in-out infinite}
+@keyframes labelFade{0%,100%{opacity:.5}50%{opacity:1}}
+.loader-theme-colors{position:absolute;bottom:60px;right:0;display:flex;gap:8px;padding:10px;border-radius:12px;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);opacity:0;visibility:hidden;transform:translateY(10px);transition:all .3s}
 .loader-theme-colors.show{opacity:1;visibility:visible;transform:translateY(0)}
-.loader-theme-color{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.3);cursor:pointer;transition:all .2s;padding:0}
+.loader-theme-color{width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,.3);cursor:pointer;transition:all .2s;padding:0}
 .loader-theme-color:hover{transform:scale(1.2);border-color:#fff}
-.loader-theme-color.active{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.5)}
+.loader-theme-color.active{border-color:#fff;box-shadow:0 0 12px rgba(255,255,255,.6)}
 </style>
 </head>
 <body>
@@ -62,8 +65,9 @@
   </div>
   <div class="loader-tip" id="loaderTip">正在初始化引擎...</div>
   <div class="loader-theme-switcher">
+    <span class="loader-theme-label">切换主题</span>
     <button class="loader-theme-btn" id="loaderThemeBtn" title="切换背景色">🎨</button>
-    <div class="loader-theme-colors" id="loaderThemeColors">
+    <div class="loader-theme-colors" id="loaderThemeColors"> id="loaderThemeColors">
       <button class="loader-theme-color active" data-theme="deepspace" style="background:linear-gradient(135deg,#0f172a,#1e1b4b)" title="深空蓝"></button>
       <button class="loader-theme-color" data-theme="aurora" style="background:linear-gradient(135deg,#064e3b,#134e4a)" title="极光绿"></button>
       <button class="loader-theme-color" data-theme="sunset" style="background:linear-gradient(135deg,#7c2d12,#9a3412)" title="落日橙"></button>
