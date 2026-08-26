@@ -64,6 +64,20 @@
 .loader-theme-color{width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,.3);cursor:pointer;transition:all .2s;padding:0}
 .loader-theme-color:hover{transform:scale(1.2);border-color:#fff}
 .loader-theme-color.active{border-color:#fff;box-shadow:0 0 12px rgba(255,255,255,.6)}
+.loader-sun-btn{width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,200,50,.6);background:linear-gradient(135deg,#ffd700,#ff8c00);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;font-size:18px;box-shadow:0 0 15px rgba(255,200,50,.5);animation:sunSpin 4s linear infinite}
+.loader-sun-btn:hover{transform:scale(1.15);box-shadow:0 0 25px rgba(255,200,50,.8)}
+@keyframes sunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.loader-sun-btn:hover{animation-play-state:paused}
+/* 浅色模式 */
+#globalLoader.light-mode{background:linear-gradient(135deg,#f0f4ff 0%,#e8e0ff 50%,#f0f4ff 100%)!important}
+#globalLoader.light-mode::before{background:radial-gradient(circle,rgba(51,115,255,.1) 0%,transparent 70%)!important}
+#globalLoader.light-mode::after{background-image:linear-gradient(rgba(0,0,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.03) 1px,transparent 1px)!important}
+#globalLoader.light-mode .loader-logo span{color:#1e293b!important}
+#globalLoader.light-mode .loader-logo-icon{box-shadow:0 8px 32px rgba(51,115,255,.3)!important}
+#globalLoader.light-mode .loader-percent{color:#1e293b!important}
+#globalLoader.light-mode .loader-tip{color:rgba(0,0,0,.5)!important}
+#globalLoader.light-mode .loader-progress-info span:first-child{color:rgba(0,0,0,.4)!important}
+#globalLoader.light-mode .loader-theme-label{color:rgba(0,0,0,.6)!important}
 </style>
 </head>
 <body>
@@ -82,6 +96,7 @@
   </div>
   <div class="loader-tip" id="loaderTip">正在初始化引擎...</div>
   <div class="loader-theme-switcher">
+    <button class="loader-sun-btn" id="loaderSunBtn" title="切换浅色模式">☀️</button>
     <span class="loader-theme-label">切换主题</span>
     <button class="loader-theme-btn" id="loaderThemeBtn" title="切换背景色">🎨</button>
     <div class="loader-theme-colors" id="loaderThemeColors"> id="loaderThemeColors">
@@ -245,6 +260,17 @@
         colorBtns.forEach(function(b){b.classList.remove("active");});
         btn.classList.add("active");
       });
+    });
+  }
+  /* ===== 小太阳浅色模式切换 ===== */
+  var sunBtn=document.getElementById("loaderSunBtn");
+  var savedLight=localStorage.getItem("loaderLight")==="true";
+  if(savedLight&&loaderEl)loaderEl.classList.add("light-mode");
+  if(sunBtn){
+    sunBtn.addEventListener("click",function(e){
+      e.stopPropagation();
+      var isLight=loaderEl.classList.toggle("light-mode");
+      localStorage.setItem("loaderLight",isLight?"true":"false");
     });
   }
   window.addEventListener("load",function(){setTimeout(function(){if(window.__loaderComplete)window.__loaderComplete();},800);});
