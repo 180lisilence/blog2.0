@@ -58,6 +58,15 @@
 .loader-percent{font-size:24px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
 .loader-tip{font-size:13px;color:rgba(255,255,255,.5);margin-top:24px;text-align:center;z-index:2;position:relative;min-height:20px;transition:opacity .3s}
 .loader-hide{opacity:0!important;visibility:hidden!important;pointer-events:none}
+/* 颜色切换 */
+.loader-theme-switcher{position:absolute;bottom:30px;right:30px;z-index:10}
+.loader-theme-btn{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;backdrop-filter:blur(10px)}
+.loader-theme-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.1)}
+.loader-theme-colors{position:absolute;bottom:50px;right:0;display:flex;gap:8px;padding:10px;border-radius:12px;background:rgba(0,0,0,.4);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);opacity:0;visibility:hidden;transform:translateY(10px);transition:all .3s}
+.loader-theme-colors.show{opacity:1;visibility:visible;transform:translateY(0)}
+.loader-theme-color{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.3);cursor:pointer;transition:all .2s;padding:0}
+.loader-theme-color:hover{transform:scale(1.2);border-color:#fff}
+.loader-theme-color.active{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.5)}
 </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans transition-colors duration-300">
@@ -78,6 +87,17 @@
     </div>
   </div>
   <div class="loader-tip" id="loaderTip">正在初始化引擎...</div>
+<div class="loader-theme-switcher">
+    <button class="loader-theme-btn" id="loaderThemeBtn" title="切换背景色"><i class="fa-solid fa-palette"></i></button>
+    <div class="loader-theme-colors" id="loaderThemeColors">
+      <button class="loader-theme-color active" data-theme="deepspace" style="background:linear-gradient(135deg,#0f172a,#1e1b4b)" title="深空蓝"></button>
+      <button class="loader-theme-color" data-theme="aurora" style="background:linear-gradient(135deg,#064e3b,#134e4a)" title="极光绿"></button>
+      <button class="loader-theme-color" data-theme="sunset" style="background:linear-gradient(135deg,#7c2d12,#9a3412)" title="落日橙"></button>
+      <button class="loader-theme-color" data-theme="sakura" style="background:linear-gradient(135deg,#831843,#9d174d)" title="樱花粉"></button>
+      <button class="loader-theme-color" data-theme="royal" style="background:linear-gradient(135deg,#2e1065,#4c1d95)" title="皇家紫"></button>
+      <button class="loader-theme-color" data-theme="ocean" style="background:linear-gradient(135deg,#0c4a6e,#075985)" title="海洋蓝"></button>
+    </div>
+  </div>
 </div>
 
 <!-- ===== 导航栏 ===== -->
@@ -182,6 +202,38 @@
   };
   setTimeout(function() { if (progress < 100) window.__loaderComplete(); }, 8000);
   simulate();
+
+/* ===== 颜色切换 ===== */
+  var themes = {
+    deepspace: 'linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%)',
+    aurora: 'linear-gradient(135deg,#064e3b 0%,#134e4a 50%,#064e3b 100%)',
+    sunset: 'linear-gradient(135deg,#7c2d12 0%,#9a3412 50%,#7c2d12 100%)',
+    sakura: 'linear-gradient(135deg,#831843 0%,#9d174d 50%,#831843 100%)',
+    royal: 'linear-gradient(135deg,#2e1065 0%,#4c1d95 50%,#2e1065 100%)',
+    ocean: 'linear-gradient(135deg,#0c4a6e 0%,#075985 50%,#0c4a6e 100%)'
+  };
+  var savedTheme = localStorage.getItem('loaderTheme') || 'deepspace';
+  var loaderEl = document.getElementById('globalLoader');
+  if (loaderEl && themes[savedTheme]) loaderEl.style.background = themes[savedTheme];
+
+  var themeBtn = document.getElementById('loaderThemeBtn');
+  var themeColors = document.getElementById('loaderThemeColors');
+  if (themeBtn && themeColors) {
+    themeBtn.addEventListener('click', function(e) { e.stopPropagation(); themeColors.classList.toggle('show'); });
+    document.addEventListener('click', function() { themeColors.classList.remove('show'); });
+    var colorBtns = themeColors.querySelectorAll('.loader-theme-color');
+    colorBtns.forEach(function(btn) {
+      if (btn.dataset.theme === savedTheme) btn.classList.add('active'); else btn.classList.remove('active');
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var t = btn.dataset.theme;
+        if (loaderEl && themes[t]) loaderEl.style.background = themes[t];
+        localStorage.setItem('loaderTheme', t);
+        colorBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+      });
+    });
+  }
 })();
 
 document.addEventListener('DOMContentLoaded', function () {
