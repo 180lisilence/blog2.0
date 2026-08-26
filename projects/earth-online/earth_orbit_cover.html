@@ -6713,35 +6713,15 @@
   </div>
 </div>
 
-<!-- ========== 工作台模块（原封不动 iframe 嵌入） ========== -->
-<div class="page" id="workbench-page">
-  <div class="module-topbar">
-    <button class="module-back-btn" onclick="backFromModule()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
-      返回主页
-    </button>
-    <span class="module-title">个人工作台</span>
-  </div>
-  <iframe class="module-iframe" src="../../workbench/index.html" allow="fullscreen; pointer-lock" allowfullscreen></iframe>
-</div>
 
-<!-- ========== 钢铁前线狙击模块（原封不动 iframe 嵌入） ========== -->
-<div class="page" id="sniper-page">
-  <div class="module-topbar">
-    <button class="module-back-btn" onclick="backFromModule()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
-      返回主页
-    </button>
-    <span class="module-title">钢铁前线 · 狙击 — 二战 FPS</span>
-  </div>
-  <iframe class="module-iframe" src="../steel-frontline/index.html" allow="fullscreen; pointer-lock; gamepad" allowfullscreen></iframe>
-</div>
+
+
 
 <!-- ========== 背景音乐（随机播放 mp3 文件夹中的歌曲） ========== -->
 <audio id="bgMusicAudio" preload="auto"></audio>
 
 <!-- ========== 音乐悬浮窗（小型可拖拽，后台播放） ========== -->
-<div id="music-float-player" class="music-float" style="display:none;">
+<div id="music-float-player" class="music-float" style="display:flex;">
   <div class="music-float-header" id="musicFloatHeader">
     <div class="music-float-title">
       <span class="music-float-icon">🎵</span>
@@ -6760,7 +6740,7 @@
     </div>
   </div>
   <div class="music-float-body" id="musicFloatBody">
-    <iframe id="musicFloatIframe" src="" allow="autoplay; clipboard-write; encrypted-media" allowfullscreen></iframe>
+    <iframe id="musicFloatIframe" src="https://music.mmp.cc/" allow="autoplay; clipboard-write; encrypted-media" allowfullscreen></iframe>
   </div>
 </div>
 <!-- 最小化后的悬浮气泡 -->
@@ -6780,27 +6760,7 @@
     </button>
   </div>
   <div class="dashboard-grid">
-    <div class="dashboard-card" onclick="toggleMusicPlayer()">
-      <div class="dashboard-card-banner music">🎵</div>
-      <div class="dashboard-card-info">
-        <div class="dashboard-card-name">在线音乐</div>
-        <div class="dashboard-card-desc">点击打开悬浮播放器，后台播放不中断</div>
-      </div>
-    </div>
-    <div class="dashboard-card" onclick="openDashboardApp('workbench-page')">
-      <div class="dashboard-card-banner workbench">🏠</div>
-      <div class="dashboard-card-info">
-        <div class="dashboard-card-name">个人工作台</div>
-        <div class="dashboard-card-desc">日程管理、计划追踪、效率工具一站搞定</div>
-      </div>
-    </div>
-    <div class="dashboard-card" onclick="openDashboardApp('sniper-page')">
-      <div class="dashboard-card-banner sniper">🎯</div>
-      <div class="dashboard-card-info">
-        <div class="dashboard-card-name">钢铁前线</div>
-        <div class="dashboard-card-desc">二战狙击 FPS，沉浸式战场体验</div>
-      </div>
-    </div>
+
   </div>
 </div>
 <div class="phone-overlay" id="phoneOverlay" style="display:none !important;">
@@ -6816,16 +6776,7 @@
       <div class="phone-greeting-time" id="phoneBigTime">--:--</div>
       <div class="phone-greeting-date" id="phoneDate">--</div>
     </div>
-    <div class="phone-apps">
-      <div class="phone-app" onclick="openPhoneApp('workbench-page')">
-        <div class="phone-app-icon workbench">🏠</div>
-        <div class="phone-app-label">工作台</div>
-      </div>
-      <div class="phone-app" onclick="openPhoneApp('sniper-page')">
-        <div class="phone-app-icon sniper">🎯</div>
-        <div class="phone-app-label">钢铁前线</div>
-      </div>
-    </div>
+
     <div class="phone-dock">
       <button class="phone-enter-game" onclick="closePhoneHome()">进 入 游 戏</button>
     </div>
