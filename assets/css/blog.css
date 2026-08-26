@@ -18,8 +18,26 @@
   --glow: 0 0 40px rgba(99,102,241,0.3);
 }
 
+/* 显式浅色主题：浅色背景 + 深色文字，切换后有清晰对比 */
+html[data-theme="light"] {
+  --bg: #f0f2f8;
+  --card: rgba(255,255,255,0.7);
+  --card-solid: #ffffff;
+  --text: #1a1f36;
+  --muted: #5a6478;
+  --line: rgba(0,0,0,0.06);
+  --brand: #4f46e5;
+  --brand-2: #7c3aed;
+  --brand-3: #db2777;
+  --brand-soft: rgba(79,70,229,0.08);
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --shadow-lg: 0 16px 48px rgba(79,70,229,0.12);
+  --glow: 0 0 30px rgba(79,70,229,0.15);
+}
+
+/* 未显式选择主题时，跟随系统偏好（用于文章页等没有切换按钮的页面） */
 @media (prefers-color-scheme: light) {
-  :root {
+  :root:not([data-theme]) {
     --bg: #f0f2f8;
     --card: rgba(255,255,255,0.7);
     --card-solid: #ffffff;

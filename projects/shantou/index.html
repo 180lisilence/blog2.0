@@ -668,11 +668,10 @@
 .global-sun-btn{position:fixed;top:16px;right:16px;z-index:999999;width:42px;height:42px;border-radius:50%;border:2px solid rgba(255,200,50,.7);background:linear-gradient(135deg,#ffd700,#ff8c00);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 12px rgba(255,165,0,.5);transition:all .3s;animation:globalSunSpin 6s linear infinite;backdrop-filter:blur(4px)}
 .global-sun-btn:hover{transform:scale(1.15) rotate(15deg);box-shadow:0 4px 20px rgba(255,165,0,.8);animation-play-state:paused}
 @keyframes globalSunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-/* 深色模式：用 filter 反转整个页面颜色 */
-body.theme-dark{filter:invert(1) hue-rotate(180deg)}
-body.theme-dark img,body.theme-dark video,body.theme-dark canvas,body.theme-dark iframe{filter:invert(1) hue-rotate(180deg)}
-/* 深色模式下小太阳保持原色 */
-body.theme-dark .global-sun-btn{filter:invert(1) hue-rotate(180deg)}
+/* 浅色模式：清晰的浅背景 + 深文字（替代 filter 反转，保证对比度） */
+html[data-theme="light"] body{background:#eef1f6;color:#1a1f36}
+html[data-theme="light"] h1,html[data-theme="light"] h2,html[data-theme="light"] h3{color:#1a1f36;-webkit-text-fill-color:#1a1f36}
+html[data-theme="light"] p{color:#3f4a63}
 </style>
 </head>
 <body>
@@ -1059,16 +1058,19 @@ body.theme-dark .global-sun-btn{filter:invert(1) hue-rotate(180deg)}
 </script>
 <script>
 (function(){
+  var html=document.documentElement;
   var btn=document.getElementById("globalSunBtn");
-  var isDark=localStorage.getItem("globalThemeDark")==="true";
-  if(isDark)document.body.classList.add("theme-dark");
-  if(btn){
-    btn.addEventListener("click",function(e){
-      e.stopPropagation();
-      var dark=document.body.classList.toggle("theme-dark");
-      localStorage.setItem("globalThemeDark",dark?"true":"false");
-    });
-  }
+  function setTheme(t){ html.setAttribute("data-theme", t); }
+  var saved=localStorage.getItem("globalTheme");
+  if(saved==="light"||saved==="dark"){ setTheme(saved); }
+  else { setTheme(window.matchMedia("(prefers-color-scheme: light)").matches ? "light":"dark"); }
+  if(btn)btn.addEventListener("click",function(e){
+    e.stopPropagation();
+    var cur=(html.getAttribute("data-theme")==="light")?"light":"dark";
+    var next=cur==="light"?"dark":"light";
+    setTheme(next);
+    localStorage.setItem("globalTheme", next);
+  });
 })();
 </script>
 </body>
