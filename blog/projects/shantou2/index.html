@@ -246,6 +246,7 @@ html[data-theme="light"] .modal h3{color:#0284c7}
 html[data-theme="light"] .modal-close{color:#64748b}
 html[data-theme="light"] footer{background:#ffffff;color:#64748b}
 </style>
+<script src="../../assets/js/blog-storage.js"></script>
 </head>
 <body>
 
@@ -381,7 +382,7 @@ const DEFAULT_CONFIG = {
 /* 读取配置：优先 localStorage，否则使用默认值 */
 function loadConfig() {
   try {
-    const saved = localStorage.getItem("mc_server_config");
+    const saved = BS.get("mc_server_config");
     if (saved) return Object.assign({}, DEFAULT_CONFIG, JSON.parse(saved));
   } catch (e) { console.warn("配置读取失败", e); }
   return DEFAULT_CONFIG;

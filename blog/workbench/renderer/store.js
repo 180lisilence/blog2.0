@@ -3,16 +3,32 @@
 'use strict';
 // 用 wbAPI 避免与 preload contextBridge 注入的 workbenchAPI 标识符冲突
 const wbAPI = window.workbenchAPI || {
-    _lsKey: 'workbench-data',
+    _lsKey: 'workbench-data', // 旧版 localStorage 键（用于迁移）
+    _key: 'workbench',        // 新版 BS 键（走后端）
     async load() {
         try {
-            const raw = localStorage.getItem(this._lsKey);
-            return { success: true, data: raw ? JSON.parse(raw) : null };
+            let data = (window.BS) ? BS.get(this._key) : null;
+            if (data === null || data === undefined) {
+                // 旧版数据迁移：localStorage 的 workbench-data → 后端
+                try {
+                    const raw = localStorage.getItem(this._lsKey);
+                    if (raw) {
+                        data = JSON.parse(raw);
+                        if (window.BS) BS.set(this._key, data);
+                    }
+                } catch (e2) {}
+            }
+            return {
+                success: true,
+                data: data || null,
+                server: !!(window.BS && window.BS.server)
+            };
         } catch (e) { return { success: false, error: e.message }; }
     },
     async save(data) {
         try {
-            localStorage.setItem(this._lsKey, JSON.stringify(data));
+            if (window.BS) BS.set(this._key, data);
+            else localStorage.setItem(this._lsKey, JSON.stringify(data));
             return { success: true };
         } catch (e) { return { success: false, error: e.message }; }
     },

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/fancy.css">
-    <script src="js/common.js"></script>
+    <script src="../../assets/js/blog-storage.js"></script>
+<script src="js/common.js"></script>
     <script>tailwind.config={darkMode:'class'}</script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4">
@@ -115,7 +116,7 @@ function resetPwd(username){
 
 //登录日志
 function renderLoginLog(){
-    const logs = JSON.parse(localStorage.getItem("loginLogs"));
+    const logs = JSON.parse(BS.get("loginLogs"));
     let html = "";
     logs.slice().reverse().forEach(l=>{
         html += `<div class="bg-white dark:bg-gray-800 p-2 rounded">账号：${l.username} 登录时间：${l.time}</div>`;
@@ -125,7 +126,7 @@ function renderLoginLog(){
 
 //菜品管理
 function renderAdminFood(){
-    const foods = JSON.parse(localStorage.getItem("foods"));
+    const foods = JSON.parse(BS.get("foods"));
     let html = "";
     foods.forEach(f=>{
         html += `
@@ -143,24 +144,24 @@ function addFood(){
         alert("信息填写完整");
         return;
     }
-    const foods = JSON.parse(localStorage.getItem("foods"));
+    const foods = JSON.parse(BS.get("foods"));
     const newId = Math.max(...foods.map(x=>x.id))+1;
     foods.push({id:newId,name,price,img:"images/food.jpg"});
-    localStorage.setItem("foods", JSON.stringify(foods));
+    BS.set("foods", JSON.stringify(foods));
     renderAdminFood();
     document.getElementById("food-name").value="";
     document.getElementById("food-price").value="";
     alert("新增成功");
 }
 function delFood(id){
-    let foods = JSON.parse(localStorage.getItem("foods")).filter(f=>f.id!==id);
-    localStorage.setItem("foods", JSON.stringify(foods));
+    let foods = JSON.parse(BS.get("foods")).filter(f=>f.id!==id);
+    BS.set("foods", JSON.stringify(foods));
     renderAdminFood();
 }
 
 //全部订单
 function renderAllOrder(){
-    const orders = JSON.parse(localStorage.getItem("orders"));
+    const orders = JSON.parse(BS.get("orders"));
     let html = "";
     orders.slice().reverse().forEach(o=>{
         let goodsText = o.goods.map(g=>`${g.name}×${g.num}`).join(" ");
@@ -179,7 +180,7 @@ function renderAllOrder(){
 
 //全部建议
 function renderAllSuggest(){
-    const suggests = JSON.parse(localStorage.getItem("suggests"));
+    const suggests = JSON.parse(BS.get("suggests"));
     let html = "";
     suggests.slice().reverse().forEach(s=>{
         html += `

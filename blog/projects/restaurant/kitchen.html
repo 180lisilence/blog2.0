@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/fancy.css">
-    <script src="js/common.js"></script>
+    <script src="../../assets/js/blog-storage.js"></script>
+<script src="js/common.js"></script>
     <script>tailwind.config={darkMode:'class'}</script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4">
@@ -25,7 +26,7 @@
 <script>
 window.onload = renderKitchenOrder();
 function renderKitchenOrder(){
-    const orders = JSON.parse(localStorage.getItem("orders"));
+    const orders = JSON.parse(BS.get("orders"));
     const waitOrder = orders.filter(o=>o.status === "待出餐");
     let html = "";
     waitOrder.forEach(o=>{
@@ -43,11 +44,11 @@ function renderKitchenOrder(){
 }
 
 function finishOrder(orderId){
-    const orders = JSON.parse(localStorage.getItem("orders"));
+    const orders = JSON.parse(BS.get("orders"));
     const obj = orders.find(o=>o.orderId === orderId);
     if(obj){
         obj.status = "已出餐";
-        localStorage.setItem("orders", JSON.stringify(orders));
+        BS.set("orders", JSON.stringify(orders));
     }
     renderKitchenOrder();
 }

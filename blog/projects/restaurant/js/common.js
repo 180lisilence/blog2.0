@@ -8,16 +8,16 @@ const ADMIN_PWD = 'admin123';
 
 // ============ 数据初始化（首次运行时写入默认数据） ============
 (function initData() {
-    if (!localStorage.getItem('users')) {
-        localStorage.setItem('users', JSON.stringify([
+    if (!BS.get('users')) {
+        BS.set('users', JSON.stringify([
             { username: 'student', password: '123456', avatar: '' }
         ]));
     }
-    if (!localStorage.getItem('loginLogs')) {
-        localStorage.setItem('loginLogs', JSON.stringify([]));
+    if (!BS.get('loginLogs')) {
+        BS.set('loginLogs', JSON.stringify([]));
     }
-    if (!localStorage.getItem('foods')) {
-        localStorage.setItem('foods', JSON.stringify([
+    if (!BS.get('foods')) {
+        BS.set('foods', JSON.stringify([
             { id: 1, name: '红烧肉', price: 12, img: '' },
             { id: 2, name: '宫保鸡丁', price: 10, img: '' },
             { id: 3, name: '鱼香肉丝', price: 10, img: '' },
@@ -26,31 +26,31 @@ const ADMIN_PWD = 'admin123';
             { id: 6, name: '清炒时蔬', price: 6, img: '' }
         ]));
     }
-    if (!localStorage.getItem('orders')) {
-        localStorage.setItem('orders', JSON.stringify([]));
+    if (!BS.get('orders')) {
+        BS.set('orders', JSON.stringify([]));
     }
-    if (!localStorage.getItem('suggests')) {
-        localStorage.setItem('suggests', JSON.stringify([]));
+    if (!BS.get('suggests')) {
+        BS.set('suggests', JSON.stringify([]));
     }
-    if (!localStorage.getItem('cart')) {
-        localStorage.setItem('cart', JSON.stringify([]));
+    if (!BS.get('cart')) {
+        BS.set('cart', JSON.stringify([]));
     }
-    if (!localStorage.getItem('carts')) {
-        localStorage.setItem('carts', JSON.stringify({}));
+    if (!BS.get('carts')) {
+        BS.set('carts', JSON.stringify({}));
     }
 })();
 
 // ============ 用户管理 ============
 function getUserList() {
     try {
-        return JSON.parse(localStorage.getItem('users')) || [];
+        return JSON.parse(BS.get('users')) || [];
     } catch (e) {
         return [];
     }
 }
 
 function saveUserList(users) {
-    localStorage.setItem('users', JSON.stringify(users));
+    BS.set('users', JSON.stringify(users));
 }
 
 function updateUserInfo(username, updates) {
@@ -69,7 +69,7 @@ function getCurrentUser() {
 // ============ 登录日志 ============
 function addLoginLog(username) {
     try {
-        const logs = JSON.parse(localStorage.getItem('loginLogs')) || [];
+        const logs = JSON.parse(BS.get('loginLogs')) || [];
         const now = new Date();
         const time = now.getFullYear() + '-' +
             String(now.getMonth() + 1).padStart(2, '0') + '-' +
@@ -78,7 +78,7 @@ function addLoginLog(username) {
             String(now.getMinutes()).padStart(2, '0') + ':' +
             String(now.getSeconds()).padStart(2, '0');
         logs.push({ username, time });
-        localStorage.setItem('loginLogs', JSON.stringify(logs));
+        BS.set('loginLogs', JSON.stringify(logs));
     } catch (e) {
         console.warn('登录日志写入失败', e);
     }

@@ -70,19 +70,22 @@ Router.registerRoute('profile', async (root) => {
 
 // Profile辅助函数
 function getProfile() {
-    const raw = localStorage.getItem('personal_profile');
-    if (raw) { try { return JSON.parse(raw); } catch {} }
-    const profile = {
+    let profile = BS.get('personal_profile');
+    if (!profile) {
+        try { const raw = localStorage.getItem('personal_profile'); if (raw) profile = JSON.parse(raw); } catch {}
+    }
+    if (profile) return profile;
+    profile = {
         id: 'u_' + Date.now().toString(36),
         nickname: '用户' + new Date().getDate(),
         avatar: '👤',
         bio: '',
         createdAt: U.fmtDate(new Date())
     };
-    localStorage.setItem('personal_profile', JSON.stringify(profile));
+    BS.set('personal_profile', profile);
     return profile;
 }
-function saveProfile(p) { localStorage.setItem('personal_profile', JSON.stringify(p)); }
+function saveProfile(p) { BS.set('personal_profile', p); }
 
 async function getStats() {
     try {
@@ -183,7 +186,7 @@ function exportData() {
         version: 1,
         exportedAt: U.now(),
         appStore: Store.appStore,
-        profile: JSON.parse(localStorage.getItem('personal_profile') || 'null')
+        profile: BS.get('personal_profile') || null
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -209,7 +212,7 @@ function importData() {
             if (src.config && typeof src.config === 'object') Store.appStore.config = Store.Config._clone(src.config);
             Store.migrateConfig();
             if (data.profile && typeof data.profile === 'object') {
-                localStorage.setItem('personal_profile', JSON.stringify(data.profile));
+                BS.set('personal_profile', data.profile);
             }
             await Store.persistStore();
             UI.Toast.show('数据已导入', 'ok');

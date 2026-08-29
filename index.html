@@ -123,6 +123,15 @@
       transition: all .2s;
     }
     .guest-btn:hover { color: #4f46e5; border-color: #667eea; background: #f5f7ff; }
+    .divider { display: flex; align-items: center; gap: 10px; margin: 18px 0 14px; color: #9ca3af; font-size: 12px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+    .pwd-form { display: flex; flex-direction: column; gap: 10px; }
+    .pwd-form input { width: 100%; padding: 11px 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 14px; outline: none; transition: border-color .2s; box-sizing: border-box; }
+    .pwd-form input:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,.1); }
+    .pwd-form button { width: 100%; padding: 11px; border: none; border-radius: 10px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .2s; }
+    .pwd-form button:hover { opacity: .9; }
+    .pwd-form button:disabled { opacity: .5; cursor: not-allowed; }
+    .pwd-error { color: #ef4444; font-size: 12px; min-height: 16px; text-align: left; }
   </style>
 </head>
 <body>
@@ -144,6 +153,14 @@
     <span id="tip">正在加载二维码...</span>
   </div>
   <div class="countdown" id="countdown"></div>
+
+  <div class="divider">或使用账号密码登录</div>
+  <div class="pwd-form">
+    <input type="text" id="pwdUser" placeholder="账号（如 admin）" autocomplete="username">
+    <input type="password" id="pwdPass" placeholder="密码" autocomplete="current-password">
+    <div class="pwd-error" id="pwdError"></div>
+    <button id="pwdLoginBtn" onclick="pwdLogin()">登 录</button>
+  </div>
 
   <div class="steps" id="steps">
     <div class="step" id="st1"><i>1</i> 扫码</div>
@@ -173,6 +190,42 @@
     // 用相对路径跳转：服务端下解析为 /blog/index.html，本地/APP 打包下直接打开本地 blog/index.html
     location.href = "blog/index.html";
   }
+
+  // 电脑端账号密码直接登录（无需手机扫码）
+  async function pwdLogin() {
+    const btn = document.querySelector("#pwdLoginBtn");
+    const err = document.querySelector("#pwdError");
+    const u = document.querySelector("#pwdUser").value.trim();
+    const p = document.querySelector("#pwdPass").value;
+    err.textContent = "";
+    if (!u || !p) { err.textContent = "请输入账号和密码"; return; }
+    btn.disabled = true; btn.textContent = "登录中...";
+    try {
+      const r = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: u, password: p })
+      });
+      const d = await r.json();
+      if (d.ok) {
+        document.cookie = "web_token=" + encodeURIComponent(d.webToken) + "; path=/; max-age=604800; SameSite=Lax";
+        document.querySelector("#tip").innerText = "登录成功，正在进入系统...";
+        document.querySelector("#dot").className = "dot confirmed";
+        setTimeout(() => { location.href = "/blog/"; }, 600);
+      } else {
+        err.textContent = d.msg || "登录失败";
+        btn.disabled = false; btn.textContent = "登 录";
+      }
+    } catch (e) {
+      err.textContent = "网络错误，请检查服务是否启动";
+      btn.disabled = false; btn.textContent = "登 录";
+    }
+  }
+  // 回车快捷登录
+  document.addEventListener("DOMContentLoaded", () => {
+    const passInput = document.querySelector("#pwdPass");
+    if (passInput) passInput.addEventListener("keydown", e => { if (e.key === "Enter") pwdLogin(); });
+  });
 
   async function initQr() {
     clearInterval(pollTimer);
@@ -242,8 +295,9 @@
             setStatus("等待手机扫码", "pending");
             break;
           case "scanned":
-            setStatus("已扫码！请在手机页面确认登录", "scanned");
+            setStatus("检测到已扫码，请在手机上确认登录", "scanned");
             setStep(1, "done"); setStep(2, "active");
+            showMask("📱", "检测到已扫码，请在手机上确认登录");
             break;
           case "confirmed":
             clearInterval(pollTimer);

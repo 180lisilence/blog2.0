@@ -4,14 +4,30 @@
 (function() {
   'use strict';
 
-  // ========== 数据存储工具 ==========
+  // ========== 数据存储工具（接入博客后端，按登录账号隔离持久化到 MySQL） ==========
+  // 优先使用全站存储层 BS；若 BS 未加载则回退 localStorage，保证游戏仍可运行
+  var store = (typeof BS !== 'undefined' && BS) ? BS : {
+    get: function(k) { try { return JSON.parse(localStorage.getItem(k)) || null; } catch(e) { return null; } },
+    set: function(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} },
+    remove: function(k) { try { localStorage.removeItem(k); } catch(e) {} }
+  };
   function DB(key, def) {
+    var ck = 'eo:' + key;
     return {
       get: function() {
-        try { return JSON.parse(localStorage.getItem('eo_' + key)) || def; }
-        catch(e) { return def; }
+        var v = null;
+        try { v = store.get(ck); } catch(e) { v = null; }
+        if (v === null || v === undefined) {
+          // 首次访问：从旧 localStorage 迁移一次
+          try {
+            var old = localStorage.getItem('eo_' + key);
+            if (old) { v = JSON.parse(old); store.set(ck, v); }
+          } catch(e) {}
+        }
+        if (v === null || v === undefined) v = def;
+        return v;
       },
-      set: function(v) { localStorage.setItem('eo_' + key, JSON.stringify(v)); },
+      set: function(v) { store.set(ck, v); },
       update: function(fn) { var v = this.get(); v = fn(v) || v; this.set(v); return v; }
     };
   }

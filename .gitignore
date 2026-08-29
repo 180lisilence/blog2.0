@@ -37,3 +37,6 @@ qrcode-login/users.json
 # 缓存
 .cache/
 .temp/
+
+# ChatRecord 用户会话数据（聊天记录，属于本机数据，不应公开）
+qrcode-login/data/

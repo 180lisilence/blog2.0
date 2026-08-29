@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light" class=""><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -6109,6 +6109,7 @@
     line-height: 1.5;
   }
 </style>`n<link rel="stylesheet" href="../../assets/css/cursor-fx.css">
+<script src="../../assets/js/blog-storage.js"></script>
 </head>
 <body>
   <!-- 7.2 WebView 启动速度：骨架屏占位 DOM（Critical CSS 已在 head 前置） -->
@@ -7461,7 +7462,7 @@
 
   // 初始化背包：创建光标元素、恢复存档或填入示例物品、渲染格子
   function initInventory() {
-    var saved = localStorage.getItem('earth_inventory');
+    var saved = BS.get('earth_inventory');
     if (saved) {
       try {
         var parsed = JSON.parse(saved);
@@ -7632,7 +7633,7 @@
   }
 
   function saveInventoryLocal() {
-    try { localStorage.setItem('earth_inventory', JSON.stringify(inventoryData)); } catch(e) {}
+    try { BS.set('earth_inventory', JSON.stringify(inventoryData)); } catch(e) {}
   }
 
   function showSlotTooltip(index, type, e) {
@@ -9463,7 +9464,7 @@
     var desc = document.getElementById('settingsActivityDesc').value;
     var img = document.getElementById('activityImg').src;
     try {
-      localStorage.setItem('eo_activity', JSON.stringify({ img: img, title: title, desc: desc }));
+      BS.set('eo_activity', JSON.stringify({ img: img, title: title, desc: desc }));
     } catch(e) {}
   }
 
@@ -9475,12 +9476,12 @@
     document.getElementById('settingsActivityDesc').value = defaultActivity.desc;
     document.getElementById('settingsActivityPreview').src = defaultActivity.img;
     document.getElementById('settingsActivityPreview').style.display = 'block';
-    try { localStorage.removeItem('eo_activity'); } catch(e) {}
+    try { BS.remove('eo_activity'); } catch(e) {}
   }
 
   function loadSavedActivity() {
     try {
-      var saved = localStorage.getItem('eo_activity');
+      var saved = BS.get('eo_activity');
       if (!saved) return;
       var data = JSON.parse(saved);
       if (data.img) document.getElementById('activityImg').src = data.img;

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/fancy.css">
-    <script src="js/common.js"></script>
+    <script src="../../assets/js/blog-storage.js"></script>
+<script src="js/common.js"></script>
     <script>tailwind.config={darkMode:'class'}</script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
@@ -180,7 +181,7 @@ function switchTab(tabId){
 
 //渲染菜品
 function renderFood(){
-    const foods = JSON.parse(localStorage.getItem("foods"));
+    const foods = JSON.parse(BS.get("foods"));
     let html = "";
     foods.forEach(f=>{
         html += `
@@ -197,16 +198,16 @@ function renderFood(){
 
 //购物车
 function getCartData(){
-    const allCart = JSON.parse(localStorage.getItem("carts"));
+    const allCart = JSON.parse(BS.get("carts"));
     return allCart[currentUser] || [];
 }
 function saveCartData(list){
-    const allCart = JSON.parse(localStorage.getItem("carts"));
+    const allCart = JSON.parse(BS.get("carts"));
     allCart[currentUser] = list;
-    localStorage.setItem("carts", JSON.stringify(allCart));
+    BS.set("carts", JSON.stringify(allCart));
 }
 function addCart(foodId){
-    const foods = JSON.parse(localStorage.getItem("foods"));
+    const foods = JSON.parse(BS.get("foods"));
     const food = foods.find(f=>f.id === foodId);
     let cart = getCartData();
     const exist = cart.find(item=>item.id === foodId);
@@ -273,7 +274,7 @@ function goSettle(){
 }
 function pay(type){
     const totalMoney = settleCart.reduce((sum,i)=>sum+i.price*i.num,0);
-    const orders = JSON.parse(localStorage.getItem("orders"));
+    const orders = JSON.parse(BS.get("orders"));
     const newOrder = {
         orderId:Date.now(),
         username:currentUser,
@@ -284,7 +285,7 @@ function pay(type){
         createTime:new Date().toLocaleString()
     };
     orders.push(newOrder);
-    localStorage.setItem("orders", JSON.stringify(orders));
+    BS.set("orders", JSON.stringify(orders));
     //清空购物车
     saveCartData([]);
     renderCart();
@@ -294,7 +295,7 @@ function pay(type){
 
 //我的订单
 function renderMyOrder(){
-    const allOrders = JSON.parse(localStorage.getItem("orders"));
+    const allOrders = JSON.parse(BS.get("orders"));
     const myOrder = allOrders.filter(o=>o.username === currentUser);
     let html = "";
     myOrder.forEach(o=>{
@@ -318,20 +319,20 @@ function submitSuggest(){
         alert("请输入内容");
         return;
     }
-    const suggests = JSON.parse(localStorage.getItem("suggests"));
+    const suggests = JSON.parse(BS.get("suggests"));
     suggests.push({
         id:Date.now(),
         username:currentUser,
         content,
         time:new Date().toLocaleString()
     });
-    localStorage.setItem("suggests", JSON.stringify(suggests));
+    BS.set("suggests", JSON.stringify(suggests));
     document.getElementById("suggest-content").value = "";
     renderMySuggest();
     alert("提交成功");
 }
 function renderMySuggest(){
-    const allSuggest = JSON.parse(localStorage.getItem("suggests"));
+    const allSuggest = JSON.parse(BS.get("suggests"));
     const mySuggest = allSuggest.filter(s=>s.username === currentUser);
     let html = "";
     mySuggest.forEach(s=>{
