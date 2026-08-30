@@ -111,7 +111,12 @@ myself-blog-beta/
 ├── projects.html               # 登录后的项目中心
 ├── chatrecord-share.html       # ChatRecord 公开分享页（无需登录）
 ├── architecture.html           # 架构说明页
+├── settings.html               # ⚙️ 用户设置页（改密码）
 ├── 打开博客.bat                 # 一键启动脚本
+├── Dockerfile                  # Docker 镜像构建
+├── docker-compose.yml          # Docker Compose 编排（含 MySQL）
+├── .dockerignore               # Docker 构建忽略
+├── CONTRIBUTING.md             # 贡献指南
 ├── LICENSE                     # MIT 许可证
 ├── README.md
 ├── docs/                       # 📖 开发者文档
@@ -236,6 +241,15 @@ pip install rapidocr_onnxruntime pillow numpy
 - 登录成功后写入登录 Cookie（7 天有效，可配置）
 - 手机扫码 URL 自动使用局域网 IP（Wi-Fi 网卡优先），手机和电脑需在同一网络
 
+## ⚙️ 用户设置
+
+登录后在项目中心点击「⚙️ 设置」可进入设置页面：
+
+- **修改密码**：输入旧密码和新密码（6-32位），修改后需重新登录
+- **退出登录**：清除当前登录态
+
+设置页路径：`/settings.html`（需登录）
+
 ## 🗄️ 数据库设计
 
 服务启动时自动创建以下表（无需手动执行 SQL）：
@@ -266,14 +280,39 @@ pip install rapidocr_onnxruntime pillow numpy
 - **密码加密**：scrypt 加盐（Node.js 内置 crypto）
 - **代码质量**：ESLint + Prettier
 - **日志**：分级日志（DEBUG/INFO/WARN/ERROR），带时间戳和模块名
+- **安全**：scrypt 密码加盐、HTTPS 强制（生产环境）、安全响应头（CSP/X-Frame-Options等）、请求频率限制、输入验证、路径穿越防护
 
 ## 📦 部署
+
+### 传统部署
 
 登录门禁依赖 Node 后端，需部署到可运行 Node 的平台（Render / Railway / 云服务器 / 宝塔 Node 项目），将整个项目上传即可。
 
 - 纯静态托管（GitHub Pages 等）无法运行登录门禁
 - MySQL 为推荐依赖，未配置时用户数据走内存缓存（重启后丢失），建议配置 MySQL 持久化
 - 部署前复制 `.env.example` 为 `.env`，修改数据库密码和管理员账号
+
+### Docker 部署（推荐）
+
+```bash
+# 1. 配置环境变量
+cp qrcode-login/.env.example qrcode-login/.env
+# 编辑 .env 修改密码等
+
+# 2. 启动（自动构建镜像 + 启动 MySQL + 博客服务）
+docker-compose up -d
+
+# 3. 查看日志
+docker-compose logs -f
+
+# 4. 停止
+docker-compose down
+```
+
+Docker Compose 会自动启动：
+- **blog** 服务：Node.js + Express，端口 3000
+- **mysql** 服务：MySQL 8.0，端口 3306，数据持久化到 Docker Volume
+- **chatrecord-data** Volume：ChatRecord 会话数据持久化
 
 ## 🤝 贡献
 

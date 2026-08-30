@@ -10,7 +10,8 @@
     "lint:fix": "eslint . --ext .js --fix",
     "format": "prettier --write \"**/*.js\"",
     "format:check": "prettier --check \"**/*.js\"",
-    "test": "node ../tests/run.js"
+    "test": "node ../tests/run.js",
+    "test:integration": "node ../tests/integration.test.js"
   },
   "keywords": [
     "blog",

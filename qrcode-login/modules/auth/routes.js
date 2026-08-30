@@ -118,6 +118,27 @@ router.get("/me", (req, res) => {
   ok(res, { username: ws.username });
 });
 
+// 修改密码
+router.post("/change-password", asyncHandler(async (req, res) => {
+  const token = getTokenFromReq(req);
+  const ws = sessionMgr.getWebSession(token);
+  if (!ws) return fail(res, 401, "请先登录");
+  const { oldPassword, newPassword } = req.body || {};
+  if (!oldPassword || !newPassword) return fail(res, 400, "请输入旧密码和新密码");
+  const passErr = validatePassword(newPassword);
+  if (passErr) return fail(res, 400, passErr);
+  try {
+    await userModel.changePassword(ws.username, oldPassword, newPassword);
+    // 密码修改后，使当前 token 失效，要求重新登录
+    sessionMgr.destroyWebSession(token);
+    ok(res, null, "密码修改成功，请重新登录");
+  } catch (e) {
+    if (e.isOperational) return fail(res, e.statusCode, e.message);
+    logger.error("auth-route", "修改密码失败", e);
+    fail(res, 500, "修改密码失败");
+  }
+}));
+
 // ========== 用户业务数据（MySQL，按用户隔离） ==========
 
 // 获取用户全部数据

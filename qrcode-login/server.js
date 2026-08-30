@@ -12,6 +12,7 @@ const { errorHandler } = require("./core/errors");
 const pool = require("./db/pool");
 const { initDatabase } = require("./db/init");
 const { createAuthGate } = require("./middleware/auth");
+const { forceHttps, securityHeaders, createRateLimiter } = require("./middleware/security");
 
 const authRoutes = require("./modules/auth/routes");
 const authModel = require("./modules/auth/model");
@@ -22,6 +23,9 @@ const projectsRoutes = require("./modules/projects/routes");
 const app = express();
 
 // ========== 全局中间件 ==========
+app.use(forceHttps);           // 生产环境强制 HTTPS
+app.use(securityHeaders);      // 安全响应头
+app.use(createRateLimiter(300, 60000)); // 频率限制：每分钟 300 次
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 
@@ -56,6 +60,9 @@ app.get("/architecture.html", (req, res) => {
 // ========== 需登录页面 ==========
 app.get("/projects.html", authGate, (req, res) => {
   res.sendFile(path.join(config.blogRoot, "projects.html"));
+});
+app.get("/settings.html", authGate, (req, res) => {
+  res.sendFile(path.join(config.blogRoot, "settings.html"));
 });
 
 // 博客内容（需登录）

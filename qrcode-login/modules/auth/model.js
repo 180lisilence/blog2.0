@@ -75,9 +75,35 @@ async function create(username, password, builtin = false) {
   return user;
 }
 
+// 修改密码
+async function changePassword(username, oldPassword, newPassword) {
+  const user = users.get(username);
+  if (!user) throw errors.notFound("用户不存在");
+  // 验证旧密码
+  if (hashPassword(oldPassword, user.salt) !== user.hash) {
+    throw errors.badRequest("旧密码错误");
+  }
+  // 生成新盐值和哈希
+  const newSalt = crypto.randomBytes(16).toString("hex");
+  const newHash = hashPassword(newPassword, newSalt);
+  try {
+    await pool.execute(
+      "UPDATE users SET salt = ?, hash = ? WHERE username = ?",
+      [newSalt, newHash, username]
+    );
+  } catch (e) {
+    logger.error("auth-model", "更新密码到 MySQL 失败", e);
+    throw errors.internal("修改密码失败，请稍后重试");
+  }
+  user.salt = newSalt;
+  user.hash = newHash;
+  logger.info("auth-model", `用户修改密码: ${username}`);
+  return true;
+}
+
 // 获取所有用户名
 function listUsernames() {
   return Array.from(users.keys());
 }
 
-module.exports = { users, loadAll, get, exists, verifyPassword, create, listUsernames, hashPassword };
+module.exports = { users, loadAll, get, exists, verifyPassword, create, changePassword, listUsernames, hashPassword };

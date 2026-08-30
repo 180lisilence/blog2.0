@@ -8,7 +8,7 @@ const path = require("path");
 
 const testsDir = __dirname;
 const testFiles = fs.readdirSync(testsDir)
-  .filter(f => f.endsWith(".test.js"))
+  .filter(f => f.endsWith(".test.js") && f !== "integration.test.js") // 集成测试独立运行
   .sort();
 
 console.log("========================================");
