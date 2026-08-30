@@ -1,15 +1,30 @@
 {
-  "name": "qrcode-login",
-  "version": "1.0.0",
+  "name": "myself-blog-project-center",
+  "version": "2.0.0",
+  "description": "项目中心服务 - 模块化架构，支持扫码登录、账号注册、项目管理、ChatRecord 时序分析",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "lint": "node -c server.js && node -c config/index.js && node -c core/logger.js && node -c core/errors.js && node -c core/security.js && node -c db/pool.js && node -c db/init.js && node -c middleware/auth.js && node -c modules/auth/model.js && node -c modules/auth/session.js && node -c modules/auth/routes.js && node -c modules/chatrecord/service.js && node -c modules/chatrecord/ocr.js && node -c modules/chatrecord/routes.js && node -c modules/projects/validator.js && node -c modules/projects/service.js && node -c modules/projects/routes.js"
   },
+  "keywords": [
+    "blog",
+    "project-center",
+    "qrcode-login",
+    "chatrecord",
+    "mysql"
+  ],
+  "author": "",
+  "license": "MIT",
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^4.22.2",
     "mysql2": "^3.24.2",
     "qrcode": "^1.5.4",
     "uuid": "^10.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }
