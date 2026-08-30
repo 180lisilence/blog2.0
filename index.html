@@ -289,6 +289,69 @@
     .btn-go { background: #10b981; color: #fff; }
     .btn-switch { background: #fff; color: #374151; border: 1px solid #d1d5db !important; }
 
+    /* 滑块验证 */
+    .slider-captcha {
+      margin: 0 0 12px 0;
+      user-select: none;
+    }
+    .slider-track {
+      position: relative;
+      width: 100%;
+      height: 40px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .slider-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #a5b4fc, #667eea);
+      transition: width 0.1s;
+    }
+    .slider-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: #9ca3af;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .slider-handle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 40px;
+      height: 100%;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      font-size: 16px;
+      color: #667eea;
+      z-index: 2;
+      transition: background 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .slider-handle:hover { background: #f9fafb; }
+    .slider-handle:active { cursor: grabbing; }
+    .slider-captcha.verified .slider-track { border-color: #10b981; }
+    .slider-captcha.verified .slider-fill { background: linear-gradient(90deg, #6ee7b7, #10b981); }
+    .slider-captcha.verified .slider-text { color: #fff; font-weight: 600; }
+    .slider-captcha.verified .slider-handle { color: #10b981; border-color: #10b981; }
+
     /* 响应式 */
     @media (max-width: 860px) {
       .brand-panel { display: none; }
@@ -336,6 +399,14 @@
         <div class="form-group">
           <label>密码</label>
           <input type="password" id="pwdPass" placeholder="请输入密码" autocomplete="current-password">
+        </div>
+        <!-- 滑块验证 -->
+        <div class="slider-captcha" id="sliderCaptcha">
+          <div class="slider-track">
+            <div class="slider-fill" id="sliderFill"></div>
+            <div class="slider-text" id="sliderText">按住滑块，拖动到最右边</div>
+            <div class="slider-handle" id="sliderHandle">→</div>
+          </div>
         </div>
         <div class="error-msg" id="pwdError"></div>
         <button class="btn-primary" id="pwdLoginBtn" onclick="pwdLogin()">登 录</button>
@@ -410,6 +481,100 @@
     if (tab === 'qrcode' && !qid) initQr();
   }
 
+  // ========== 滑块验证 ==========
+  let sliderVerified = false;
+  let sliderDragging = false;
+  let sliderStartX = 0;
+  let sliderLeft = 0;
+
+  function initSlider() {
+    const track = document.getElementById('sliderCaptcha');
+    const handle = document.getElementById('sliderHandle');
+    const fill = document.getElementById('sliderFill');
+    const text = document.getElementById('sliderText');
+    if (!track || !handle) return;
+
+    // 初始状态：禁用登录按钮
+    sliderVerified = false;
+    updateLoginBtn();
+
+    const onStart = (clientX) => {
+      if (sliderVerified) return;
+      sliderDragging = true;
+      sliderStartX = clientX;
+      sliderLeft = handle.offsetLeft;
+      handle.style.transition = 'none';
+      fill.style.transition = 'none';
+    };
+
+    const onMove = (clientX) => {
+      if (!sliderDragging || sliderVerified) return;
+      const trackWidth = track.querySelector('.slider-track').offsetWidth;
+      const handleWidth = handle.offsetWidth;
+      let newLeft = sliderLeft + (clientX - sliderStartX);
+      const maxLeft = trackWidth - handleWidth;
+      if (newLeft < 0) newLeft = 0;
+      if (newLeft > maxLeft) newLeft = maxLeft;
+      handle.style.left = newLeft + 'px';
+      fill.style.width = (newLeft + handleWidth) + 'px';
+      // 到达终点，验证成功
+      if (newLeft >= maxLeft - 2) {
+        sliderVerified = true;
+        sliderDragging = false;
+        track.classList.add('verified');
+        text.textContent = '✓ 验证成功';
+        handle.style.cursor = 'default';
+        updateLoginBtn();
+      }
+    };
+
+    const onEnd = () => {
+      if (!sliderDragging || sliderVerified) return;
+      sliderDragging = false;
+      // 未到终点，回弹
+      handle.style.transition = 'left 0.3s';
+      fill.style.transition = 'width 0.3s';
+      handle.style.left = '0px';
+      fill.style.width = '0px';
+    };
+
+    // 鼠标事件
+    handle.addEventListener('mousedown', (e) => { e.preventDefault(); onStart(e.clientX); });
+    document.addEventListener('mousemove', (e) => onMove(e.clientX));
+    document.addEventListener('mouseup', onEnd);
+    // 触摸事件
+    handle.addEventListener('touchstart', (e) => { onStart(e.touches[0].clientX); }, { passive: true });
+    document.addEventListener('touchmove', (e) => onMove(e.touches[0].clientX), { passive: true });
+    document.addEventListener('touchend', onEnd);
+  }
+
+  function resetSlider() {
+    const track = document.getElementById('sliderCaptcha');
+    const handle = document.getElementById('sliderHandle');
+    const fill = document.getElementById('sliderFill');
+    const text = document.getElementById('sliderText');
+    if (!track) return;
+    sliderVerified = false;
+    sliderDragging = false;
+    track.classList.remove('verified');
+    text.textContent = '按住滑块，拖动到最右边';
+    handle.style.left = '0px';
+    fill.style.width = '0px';
+    handle.style.cursor = 'grab';
+    handle.style.transition = 'left 0.3s';
+    fill.style.transition = 'width 0.3s';
+    updateLoginBtn();
+  }
+
+  function updateLoginBtn() {
+    const btn = document.getElementById('pwdLoginBtn');
+    if (btn) {
+      btn.disabled = !sliderVerified;
+      btn.style.opacity = sliderVerified ? '1' : '0.5';
+      btn.style.cursor = sliderVerified ? 'pointer' : 'not-allowed';
+    }
+  }
+
   // 访客模式
   function guestEnter() {
     try { document.cookie = "web_guest=1; path=/; max-age=604800; SameSite=Lax"; } catch (e) {}
@@ -425,6 +590,7 @@
     err.textContent = "";
     err.className = "error-msg";
     if (!u || !p) { err.textContent = "请输入账号和密码"; return; }
+    if (!sliderVerified) { err.textContent = "请先完成滑块验证"; return; }
     btn.disabled = true; btn.textContent = "登录中...";
     try {
       const r = await fetch("/api/login", {
@@ -463,6 +629,7 @@
     document.getElementById("panelTitle").innerText = "欢迎登录";
     document.getElementById("panelSub").innerText = "登录后进入项目中心，管理你的所有项目";
     document.getElementById("pwdError").textContent = "";
+    resetSlider();
     document.getElementById("pwdUser").focus();
   }
   async function doRegister() {
@@ -582,6 +749,7 @@
 
   // 回车快捷登录/注册
   document.addEventListener("DOMContentLoaded", () => {
+    initSlider();
     document.getElementById("pwdPass").addEventListener("keydown", e => { if (e.key === "Enter") pwdLogin(); });
     document.getElementById("regPass2").addEventListener("keydown", e => { if (e.key === "Enter") doRegister(); });
   });

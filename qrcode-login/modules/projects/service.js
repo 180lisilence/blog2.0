@@ -50,7 +50,22 @@ function getAll() {
   return [...BUILTIN_PROJECTS, ...readImported()];
 }
 
-// 扫描可导入的项目文件夹
+// 扫描白名单：已存在的项目文件夹，扫描时排除
+// 1. 从内置项目 URL 自动提取
+// 2. 手动补充已存在但未内置的旧项目
+const BUILTIN_FOLDERS = new Set([
+  // 从内置项目 URL 提取
+  ...BUILTIN_PROJECTS
+    .map(p => {
+      const m = p.url.match(/\/blog\/projects\/([^/]+)\//);
+      return m ? m[1] : null;
+    })
+    .filter(Boolean),
+  // 手动补充：已存在的旧项目文件夹（无 project.json，不应出现在可导入列表）
+  "jizhiyun-demo",
+  "shantou2"
+]);
+
 function scanAvailable() {
   const imported = readImported();
   const importedFolders = new Set(imported.map(p => p.folder));
@@ -60,6 +75,7 @@ function scanAvailable() {
       .filter(d => d.isDirectory());
     for (const f of folders) {
       if (importedFolders.has(f.name)) continue;
+      if (BUILTIN_FOLDERS.has(f.name)) continue;
       const result = readAndValidate(f.name);
       const name = result.manifest?.name || f.name;
       const icon = result.manifest?.icon || "📁";
