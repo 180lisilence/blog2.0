@@ -3,82 +3,221 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>扫码登录 · 项目中心</title>
+  <title>登录 · 项目中心</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
       min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    .card {
-      width: 420px;
-      max-width: 100%;
-      background: rgba(255, 255, 255, 0.96);
-      border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-      padding: 40px 36px 36px;
-      text-align: center;
-    }
-    .logo {
-      width: 64px;
-      height: 64px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px;
-      color: #fff;
-      font-size: 28px;
-      font-weight: 700;
-    }
-    h1 { font-size: 22px; color: #1f2937; margin-bottom: 6px; }
-    .sub { font-size: 13px; color: #9ca3af; margin-bottom: 24px; }
-
-    .qr-wrap {
-      position: relative;
-      width: 260px;
-      height: 260px;
-      margin: 0 auto 20px;
-      border-radius: 18px;
-      padding: 12px;
       background: #fff;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
     }
-    #qrImg { width: 100%; height: 100%; border-radius: 10px; display: block; }
-    .qr-mask {
-      position: absolute;
-      inset: 12px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.92);
+
+    /* ========== 左侧品牌区 ========== */
+    .brand-panel {
+      flex: 1.1;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
-      gap: 8px;
-      font-size: 14px;
+      padding: 60px 56px;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+    .brand-panel::before {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.06);
+      top: -120px; right: -120px;
+    }
+    .brand-panel::after {
+      content: '';
+      position: absolute;
+      width: 360px; height: 360px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.05);
+      bottom: -80px; left: -80px;
+    }
+    .brand-logo {
+      width: 64px; height: 64px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.18);
+      backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 28px; font-weight: 700;
+      margin-bottom: 32px;
+      position: relative; z-index: 1;
+    }
+    .brand-title {
+      font-size: 36px; font-weight: 700; color: #fff;
+      line-height: 1.3; margin-bottom: 16px;
+      position: relative; z-index: 1;
+    }
+    .brand-sub {
+      font-size: 16px; color: rgba(255,255,255,.8);
+      line-height: 1.8; margin-bottom: 40px;
+      position: relative; z-index: 1;
+    }
+    .brand-features {
+      display: flex; flex-direction: column; gap: 14px;
+      position: relative; z-index: 1;
+    }
+    .feature-item {
+      display: flex; align-items: center; gap: 12px;
+      color: rgba(255,255,255,.9); font-size: 14px;
+    }
+    .feature-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: rgba(255,255,255,.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .brand-footer {
+      position: absolute; bottom: 32px; left: 56px;
+      font-size: 12px; color: rgba(255,255,255,.5);
+      z-index: 1;
+    }
+
+    /* ========== 右侧登录区 ========== */
+    .login-panel {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px;
+      background: #fff;
+      min-height: 100vh;
+    }
+    .login-box {
+      width: 100%; max-width: 400px;
+    }
+    .login-header {
+      margin-bottom: 32px;
+    }
+    .login-header h2 {
+      font-size: 26px; font-weight: 700; color: #1f2937;
+      margin-bottom: 8px;
+    }
+    .login-header p {
+      font-size: 14px; color: #9ca3af;
+    }
+
+    /* Tab 切换 */
+    .tabs {
+      display: flex; gap: 0;
+      border-bottom: 2px solid #f3f4f6;
+      margin-bottom: 28px;
+    }
+    .tab {
+      flex: 1;
+      padding: 12px 0;
+      text-align: center;
+      font-size: 15px; font-weight: 600;
+      color: #9ca3af;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all .2s;
+      background: none; border-top: none; border-left: none; border-right: none;
+    }
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+    .tab:hover:not(.active) {
       color: #4b5563;
-      opacity: 0;
-      pointer-events: none;
+    }
+
+    /* 表单 */
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px; font-weight: 600; color: #374151;
+      margin-bottom: 8px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      transition: all .2s;
+      box-sizing: border-box;
+    }
+    .form-group input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,.1);
+    }
+    .btn-primary {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+      margin-top: 8px;
+    }
+    .btn-primary:hover { opacity: .9; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+    .form-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 13px; color: #9ca3af;
+    }
+    .form-footer a {
+      color: #667eea; text-decoration: none; font-weight: 600;
+    }
+    .form-footer a:hover { text-decoration: underline; }
+
+    .error-msg {
+      color: #ef4444; font-size: 12px;
+      min-height: 18px; margin-top: 6px;
+      text-align: left;
+    }
+    .success-msg {
+      color: #10b981; font-size: 12px;
+      min-height: 18px; margin-top: 6px;
+      text-align: left;
+    }
+
+    /* 二维码区域 */
+    .qr-section {
+      text-align: center;
+    }
+    .qr-wrap {
+      width: 220px; height: 220px;
+      margin: 0 auto 20px;
+      border-radius: 16px;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 4px 16px rgba(0,0,0,.06);
+      position: relative;
+    }
+    #qrImg { width: 100%; height: 100%; border-radius: 8px; display: block; }
+    .qr-mask {
+      position: absolute; inset: 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.94);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 8px; font-size: 13px; color: #4b5563;
+      opacity: 0; pointer-events: none;
       transition: opacity .25s;
     }
     .qr-mask.show { opacity: 1; }
-
-    .status {
-      min-height: 52px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 15px;
-      color: #374151;
-      margin-bottom: 8px;
+    .qr-status {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; font-size: 14px; color: #374151;
+      margin-bottom: 8px; min-height: 24px;
     }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; }
     .dot.pending { background: #f59e0b; animation: pulse 1.2s infinite; }
@@ -86,95 +225,173 @@
     .dot.confirmed { background: #10b981; }
     .dot.expired, .dot.invalid { background: #ef4444; }
     @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+    .qr-countdown { font-size: 12px; color: #9ca3af; }
 
-    .countdown { font-size: 12px; color: #9ca3af; }
-    .steps {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 18px;
-      font-size: 12px;
-      color: #9ca3af;
+    .qr-steps {
+      display: flex; justify-content: center; gap: 16px;
+      margin-top: 20px; font-size: 12px; color: #9ca3af;
     }
-    .step { display: flex; align-items: center; gap: 4px; }
-    .step i { width: 18px; height: 18px; border-radius: 50%; background: #e5e7eb; color: #fff; font-style: normal; font-size: 11px; line-height: 18px; }
-    .step.active i { background: #667eea; }
-    .step.done i { background: #10b981; }
-    .footer { margin-top: 18px; font-size: 12px; color: #c3c7d1; }
-    .tip-bar {
-      font-size: 13px;
-      color: #6b7280;
-      background: #f3f4f6;
-      border-radius: 10px;
-      padding: 10px 14px;
-      line-height: 1.6;
-      text-align: left;
+    .qr-step { display: flex; align-items: center; gap: 5px; }
+    .qr-step i {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #e5e7eb; color: #fff;
+      font-style: normal; font-size: 11px; line-height: 18px;
+      text-align: center;
+    }
+    .qr-step.active i { background: #667eea; }
+    .qr-step.done i { background: #10b981; }
+
+    /* 访客入口 */
+    .guest-entry {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #f3f4f6;
+      text-align: center;
     }
     .guest-btn {
-      margin-top: 14px;
       width: 100%;
-      padding: 12px;
-      border: 1px dashed #c3c7d1;
-      border-radius: 12px;
+      padding: 11px;
+      border: 1px dashed #d1d5db;
+      border-radius: 10px;
       background: #fff;
       color: #9ca3af;
       font-size: 13px;
       cursor: pointer;
       transition: all .2s;
     }
-    .guest-btn:hover { color: #4f46e5; border-color: #667eea; background: #f5f7ff; }
-    .divider { display: flex; align-items: center; gap: 10px; margin: 18px 0 14px; color: #9ca3af; font-size: 12px; }
-    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
-    .pwd-form { display: flex; flex-direction: column; gap: 10px; }
-    .pwd-form input { width: 100%; padding: 11px 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 14px; outline: none; transition: border-color .2s; box-sizing: border-box; }
-    .pwd-form input:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,.1); }
-    .pwd-form button { width: 100%; padding: 11px; border: none; border-radius: 10px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .2s; }
-    .pwd-form button:hover { opacity: .9; }
-    .pwd-form button:disabled { opacity: .5; cursor: not-allowed; }
-    .pwd-error { color: #ef4444; font-size: 12px; min-height: 16px; text-align: left; }
+    .guest-btn:hover {
+      color: #667eea; border-color: #667eea; background: #f5f7ff;
+    }
+
+    /* 已登录提示 */
+    .logged-in-bar {
+      margin-bottom: 24px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: #ecfdf5;
+      color: #047857;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .logged-in-bar .actions {
+      display: flex; gap: 8px;
+    }
+    .logged-in-bar button {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-go { background: #10b981; color: #fff; }
+    .btn-switch { background: #fff; color: #374151; border: 1px solid #d1d5db !important; }
+
+    /* 响应式 */
+    @media (max-width: 860px) {
+      .brand-panel { display: none; }
+      .login-panel { flex: 1; padding: 24px; }
+    }
   </style>
 </head>
 <body>
-<div class="card">
-  <div class="logo">M</div>
-  <h1>扫码登录</h1>
-  <div class="sub">请使用手机扫码，登录后可进入项目中心</div>
 
-  <div class="qr-wrap">
-    <img id="qrImg" alt="二维码" />
-    <div class="qr-mask" id="qrMask">
-      <div style="font-size:40px" id="maskIcon">✅</div>
-      <div id="maskText">登录成功</div>
+<!-- 左侧品牌区 -->
+<div class="brand-panel">
+  <div class="brand-logo">M</div>
+  <h1 class="brand-title">项目中心<br>一站式项目管理平台</h1>
+  <p class="brand-sub">汇聚所有项目，一键直达。<br>支持扫码登录、账号密码登录，安全便捷。</p>
+  <div class="brand-features">
+    <div class="feature-item"><div class="feature-icon">🚀</div><span>多项目集中管理，快速切换</span></div>
+    <div class="feature-item"><div class="feature-icon">🔐</div><span>安全登录，7天免登录</span></div>
+    <div class="feature-item"><div class="feature-icon">📱</div><span>手机扫码，电脑端确认</span></div>
+    <div class="feature-item"><div class="feature-icon">➕</div><span>支持自定义项目导入</span></div>
+  </div>
+  <div class="brand-footer">© 2026 项目中心 · 保留所有权利</div>
+</div>
+
+<!-- 右侧登录区 -->
+<div class="login-panel">
+  <div class="login-box">
+    <div class="login-header">
+      <h2 id="panelTitle">欢迎登录</h2>
+      <p id="panelSub">登录后进入项目中心，管理你的所有项目</p>
+    </div>
+
+    <!-- Tab 切换 -->
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-tab="password" onclick="switchTab('password')">账号登录</button>
+      <button class="tab" data-tab="qrcode" onclick="switchTab('qrcode')">扫码登录</button>
+    </div>
+
+    <!-- 账号登录表单 -->
+    <div id="passwordPane">
+      <div id="loginForm">
+        <div class="form-group">
+          <label>账号</label>
+          <input type="text" id="pwdUser" placeholder="请输入账号" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>密码</label>
+          <input type="password" id="pwdPass" placeholder="请输入密码" autocomplete="current-password">
+        </div>
+        <div class="error-msg" id="pwdError"></div>
+        <button class="btn-primary" id="pwdLoginBtn" onclick="pwdLogin()">登 录</button>
+        <div class="form-footer">还没有账号？<a href="javascript:void(0)" onclick="showRegister()">立即注册</a></div>
+      </div>
+
+      <!-- 注册表单 -->
+      <div id="registerForm" style="display:none">
+        <div class="form-group">
+          <label>设置账号</label>
+          <input type="text" id="regUser" placeholder="2-20位字母、数字或中文" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>设置密码</label>
+          <input type="password" id="regPass" placeholder="6-32位密码" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label>确认密码</label>
+          <input type="password" id="regPass2" placeholder="再次输入密码" autocomplete="new-password">
+        </div>
+        <div class="error-msg" id="regError"></div>
+        <button class="btn-primary" id="regBtn" onclick="doRegister()">注 册</button>
+        <div class="form-footer">已有账号？<a href="javascript:void(0)" onclick="showLogin()">返回登录</a></div>
+      </div>
+    </div>
+
+    <!-- 扫码登录 -->
+    <div id="qrcodePane" style="display:none">
+      <div class="qr-section">
+        <div class="qr-wrap">
+          <img id="qrImg" alt="二维码" />
+          <div class="qr-mask" id="qrMask">
+            <div style="font-size:36px" id="maskIcon">✅</div>
+            <div id="maskText">登录成功</div>
+          </div>
+        </div>
+        <div class="qr-status">
+          <span class="dot" id="dot"></span>
+          <span id="tip">正在加载二维码...</span>
+        </div>
+        <div class="qr-countdown" id="countdown"></div>
+        <div class="qr-steps" id="steps">
+          <div class="qr-step" id="st1"><i>1</i> 扫码</div>
+          <div class="qr-step" id="st2"><i>2</i> 手机确认</div>
+          <div class="qr-step" id="st3"><i>3</i> 进入系统</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 访客入口 -->
+    <div class="guest-entry">
+      <button class="guest-btn" onclick="guestEnter()" title="无法启动后台服务时，跳过登录直接进入博客">
+        ⚡ 无法连接服务？点此直接进入博客
+      </button>
     </div>
   </div>
-
-  <div class="status">
-    <span class="dot" id="dot"></span>
-    <span id="tip">正在加载二维码...</span>
-  </div>
-  <div class="countdown" id="countdown"></div>
-
-  <div class="divider">或使用账号密码登录</div>
-  <div class="pwd-form">
-    <input type="text" id="pwdUser" placeholder="账号（如 admin）" autocomplete="username">
-    <input type="password" id="pwdPass" placeholder="密码" autocomplete="current-password">
-    <div class="pwd-error" id="pwdError"></div>
-    <button id="pwdLoginBtn" onclick="pwdLogin()">登 录</button>
-  </div>
-
-  <div class="steps" id="steps">
-    <div class="step" id="st1"><i>1</i> 扫码</div>
-    <div class="step" id="st2"><i>2</i> 手机确认</div>
-    <div class="step" id="st3"><i>3</i> 进入系统</div>
-  </div>
-
-  <div class="tip-bar">
-    💡 手机扫码后，使用<strong>自己注册的账号</strong>登录；没有账号可在手机页直接注册。
-  </div>
-
-  <button class="guest-btn" onclick="guestEnter()" title="无法启动后台服务时，跳过登录直接进入博客（访客模式）">
-    ⚡ 无法连接服务？点此直接进入博客
-  </button>
 </div>
 
 <script>
@@ -182,22 +399,31 @@
   let pollTimer = null;
   let countdownTimer = null;
   let expireAt = 0;
+  let currentTab = 'password';
 
-  // 兜底入口：无法启动后台服务时，跳过登录直接进入博客（访客模式）
+  // Tab 切换
+  function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.getElementById('passwordPane').style.display = tab === 'password' ? 'block' : 'none';
+    document.getElementById('qrcodePane').style.display = tab === 'qrcode' ? 'block' : 'none';
+    if (tab === 'qrcode' && !qid) initQr();
+  }
+
+  // 访客模式
   function guestEnter() {
-    // 写访客标记：服务端在跑时凭此放行 /blog；本地打包(无服务)时不影响
     try { document.cookie = "web_guest=1; path=/; max-age=604800; SameSite=Lax"; } catch (e) {}
-    // 用相对路径跳转：服务端下解析为 /blog/index.html，本地/APP 打包下直接打开本地 blog/index.html
     location.href = "blog/index.html";
   }
 
-  // 电脑端账号密码直接登录（无需手机扫码）
+  // 账号密码登录
   async function pwdLogin() {
-    const btn = document.querySelector("#pwdLoginBtn");
-    const err = document.querySelector("#pwdError");
-    const u = document.querySelector("#pwdUser").value.trim();
-    const p = document.querySelector("#pwdPass").value;
+    const btn = document.getElementById("pwdLoginBtn");
+    const err = document.getElementById("pwdError");
+    const u = document.getElementById("pwdUser").value.trim();
+    const p = document.getElementById("pwdPass").value;
     err.textContent = "";
+    err.className = "error-msg";
     if (!u || !p) { err.textContent = "请输入账号和密码"; return; }
     btn.disabled = true; btn.textContent = "登录中...";
     try {
@@ -209,8 +435,8 @@
       const d = await r.json();
       if (d.ok) {
         document.cookie = "web_token=" + encodeURIComponent(d.webToken) + "; path=/; max-age=604800; SameSite=Lax";
-        document.querySelector("#tip").innerText = "登录成功，正在进入系统...";
-        document.querySelector("#dot").className = "dot confirmed";
+        err.className = "success-msg";
+        err.textContent = "✅ 登录成功，正在进入系统...";
         setTimeout(() => { location.href = "/blog/"; }, 600);
       } else {
         err.textContent = d.msg || "登录失败";
@@ -221,12 +447,62 @@
       btn.disabled = false; btn.textContent = "登 录";
     }
   }
-  // 回车快捷登录
-  document.addEventListener("DOMContentLoaded", () => {
-    const passInput = document.querySelector("#pwdPass");
-    if (passInput) passInput.addEventListener("keydown", e => { if (e.key === "Enter") pwdLogin(); });
-  });
 
+  // 注册
+  function showRegister() {
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("registerForm").style.display = "block";
+    document.getElementById("panelTitle").innerText = "注册账号";
+    document.getElementById("panelSub").innerText = "创建新账号，开启项目管理之旅";
+    document.getElementById("regError").textContent = "";
+    document.getElementById("regUser").focus();
+  }
+  function showLogin() {
+    document.getElementById("registerForm").style.display = "none";
+    document.getElementById("loginForm").style.display = "block";
+    document.getElementById("panelTitle").innerText = "欢迎登录";
+    document.getElementById("panelSub").innerText = "登录后进入项目中心，管理你的所有项目";
+    document.getElementById("pwdError").textContent = "";
+    document.getElementById("pwdUser").focus();
+  }
+  async function doRegister() {
+    const btn = document.getElementById("regBtn");
+    const err = document.getElementById("regError");
+    const u = document.getElementById("regUser").value.trim();
+    const p = document.getElementById("regPass").value;
+    const p2 = document.getElementById("regPass2").value;
+    err.textContent = "";
+    err.className = "error-msg";
+    if (!u) { err.textContent = "请输入账号"; return; }
+    if (u.length < 2 || u.length > 20) { err.textContent = "账号长度需为 2-20 位"; return; }
+    if (!p) { err.textContent = "请输入密码"; return; }
+    if (p.length < 6 || p.length > 32) { err.textContent = "密码长度需为 6-32 位"; return; }
+    if (p !== p2) { err.textContent = "两次输入的密码不一致"; return; }
+    btn.disabled = true; btn.textContent = "注册中...";
+    try {
+      const r = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: u, password: p })
+      });
+      const d = await r.json();
+      if (d.ok) {
+        err.className = "success-msg";
+        err.textContent = "✅ 注册成功！正在跳转到登录...";
+        document.getElementById("pwdUser").value = u;
+        document.getElementById("pwdPass").value = "";
+        setTimeout(() => { showLogin(); }, 1200);
+      } else {
+        err.textContent = d.msg || "注册失败";
+        btn.disabled = false; btn.textContent = "注 册";
+      }
+    } catch (e) {
+      err.textContent = "网络错误，请检查服务是否启动";
+      btn.disabled = false; btn.textContent = "注 册";
+    }
+  }
+
+  // 二维码登录
   async function initQr() {
     clearInterval(pollTimer);
     clearInterval(countdownTimer);
@@ -238,8 +514,8 @@
       if (!data.qid) throw new Error("生成失败");
       qid = data.qid;
       expireAt = Date.now() + data.expireSeconds * 1000;
-      document.querySelector("#qrImg").src = data.qrBase64;
-      document.querySelector("#qrImg").style.opacity = "1";
+      document.getElementById("qrImg").src = data.qrBase64;
+      document.getElementById("qrImg").style.opacity = "1";
       resetSteps();
       startCountdown(data.expireSeconds);
       startPoll();
@@ -247,43 +523,27 @@
       setStatus("二维码加载失败，请检查服务是否启动", "invalid");
     }
   }
-
   function setStatus(text, cls) {
-    const dot = document.querySelector("#dot");
-    dot.className = "dot " + cls;
-    document.querySelector("#tip").innerText = text;
+    document.getElementById("dot").className = "dot " + cls;
+    document.getElementById("tip").innerText = text;
   }
-
-  function hideMask() {
-    document.querySelector("#qrMask").classList.remove("show");
-  }
+  function hideMask() { document.getElementById("qrMask").classList.remove("show"); }
   function showMask(icon, text) {
-    document.querySelector("#maskIcon").innerText = icon;
-    document.querySelector("#maskText").innerText = text;
-    document.querySelector("#qrMask").classList.add("show");
+    document.getElementById("maskIcon").innerText = icon;
+    document.getElementById("maskText").innerText = text;
+    document.getElementById("qrMask").classList.add("show");
   }
-
-  function setStep(i, cls) {
-    document.querySelector("#st" + i).className = "step " + cls;
-  }
-  function resetSteps() {
-    setStep(1, "active"); setStep(2, ""); setStep(3, "");
-  }
-
+  function setStep(i, cls) { document.getElementById("st" + i).className = "qr-step " + cls; }
+  function resetSteps() { setStep(1, "active"); setStep(2, ""); setStep(3, ""); }
   function startCountdown(seconds) {
     let left = seconds;
-    document.querySelector("#countdown").innerText = `二维码 ${left}s 后过期`;
+    document.getElementById("countdown").innerText = `二维码 ${left}s 后过期`;
     countdownTimer = setInterval(() => {
       left--;
-      if (left < 0) {
-        clearInterval(countdownTimer);
-        document.querySelector("#countdown").innerText = "";
-        return;
-      }
-      document.querySelector("#countdown").innerText = `二维码 ${left}s 后过期`;
+      if (left < 0) { clearInterval(countdownTimer); document.getElementById("countdown").innerText = ""; return; }
+      document.getElementById("countdown").innerText = `二维码 ${left}s 后过期`;
     }, 1000);
   }
-
   function startPoll() {
     clearInterval(pollTimer);
     pollTimer = setInterval(async () => {
@@ -291,21 +551,17 @@
         const res = await fetch(`/api/qrcode/check?qid=${qid}`);
         const ret = await res.json();
         switch (ret.status) {
-          case "pending":
-            setStatus("等待手机扫码", "pending");
-            break;
+          case "pending": setStatus("等待手机扫码", "pending"); break;
           case "scanned":
             setStatus("检测到已扫码，请在手机上确认登录", "scanned");
             setStep(1, "done"); setStep(2, "active");
             showMask("📱", "检测到已扫码，请在手机上确认登录");
             break;
           case "confirmed":
-            clearInterval(pollTimer);
-            clearInterval(countdownTimer);
+            clearInterval(pollTimer); clearInterval(countdownTimer);
             setStatus("登录成功，正在进入系统...", "confirmed");
             setStep(1, "done"); setStep(2, "done"); setStep(3, "active");
             showMask("✅", "登录成功");
-            // 写入登录 Cookie（服务端凭此放行博客全部页面），并进入站点
             document.cookie = "web_token=" + encodeURIComponent(ret.webToken) + "; path=/; max-age=604800; SameSite=Lax";
             setTimeout(() => { location.href = "/blog/"; }, 900);
             break;
@@ -320,28 +576,30 @@
             setTimeout(initQr, 1200);
             break;
         }
-      } catch (e) { /* 忽略瞬时网络错误 */ }
+      } catch (e) {}
     }, 1100);
   }
 
-  // 若已登录过（Cookie 有效），直接进入站点
+  // 回车快捷登录/注册
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("pwdPass").addEventListener("keydown", e => { if (e.key === "Enter") pwdLogin(); });
+    document.getElementById("regPass2").addEventListener("keydown", e => { if (e.key === "Enter") doRegister(); });
+  });
+
+  // 已登录检测
   (async () => {
     try {
       const r = await fetch("/api/me");
       const d = await r.json();
       if (d.ok) {
-        // 显示已登录状态，可直接进入系统或切换账号
+        const box = document.querySelector(".login-box");
         const bar = document.createElement("div");
-        bar.style.cssText = "margin-bottom:18px;padding:12px 14px;border-radius:12px;background:#ecfdf5;color:#047857;font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;";
-        bar.innerHTML = '<span>✅ 已登录：<b>' + d.username + '</b>（7 天内免登录）</span>';
-        const wrap = document.createElement("div");
-        wrap.style.cssText = "display:flex;gap:8px;";
-        wrap.innerHTML = '<button id="goIn" style="border:none;background:#10b981;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;">进入系统</button>' +
-                         '<button id="switchAcc" style="border:1px solid #d1d5db;background:#fff;color:#374151;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;">退出 / 换账号</button>';
-        bar.appendChild(wrap);
-        document.querySelector(".card").insertBefore(bar, document.querySelector(".logo"));
-        document.querySelector("#goIn").onclick = () => { location.href = "/blog/"; };
-        document.querySelector("#switchAcc").onclick = async () => {
+        bar.className = "logged-in-bar";
+        bar.innerHTML = '<span>✅ 已登录：<b>' + d.username + '</b>（7天内免登录）</span>' +
+          '<div class="actions"><button class="btn-go" onclick="location.href=\'/blog/\'">进入系统</button>' +
+          '<button class="btn-switch" id="switchAcc">退出/换号</button></div>';
+        box.insertBefore(bar, box.firstChild);
+        document.getElementById("switchAcc").onclick = async () => {
           const cur = document.cookie.split(";").map(s => s.trim()).find(s => s.startsWith("web_token="));
           const t = cur ? decodeURIComponent(cur.split("=").slice(1).join("=")) : "";
           try { await fetch("/api/logout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: t }) }); } catch (e) {}
@@ -352,7 +610,6 @@
         return;
       }
     } catch (e) {}
-    initQr();
   })();
 </script>
 </body>

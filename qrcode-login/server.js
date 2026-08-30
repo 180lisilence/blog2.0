@@ -600,6 +600,164 @@ app.post("/api/chatrecord/ocr", async (req, res) => {
   proxyReq.end();
 });
 
+/* ================= 项目中心管理（导入/验证/列表） ================= */
+const PROJECTS_FILE = path.join(__dirname, "projects.json");
+const PROJECTS_DIR = path.join(BLOG_CONTENT, "projects");
+
+// 内置项目（不可删除）
+const BUILTIN_PROJECTS = [
+  { id: "builtin-workbench", name: "个人工作台", desc: "工作生活一体化本地管理应用：待办、开发、咨询、自媒体、健身、饮食、游戏、AI 对话", url: "/blog/workbench/index.html", icon: "🛠️", color: "c1", builtin: true },
+  { id: "builtin-steel", name: "钢铁前线 · 狙击", desc: "二战写实 FPS 游戏（Three.js 3D），20+ 真实武器、10 大战役、AI 士兵、可驾驶坦克", url: "/blog/projects/steel-frontline/index.html", icon: "🎯", color: "c2", builtin: true },
+  { id: "builtin-jizhiyun", name: "极智云 · 企业门户", desc: "企业级大型综合门户：营销门户、资讯管理、产品展示、订单、用户、后台运营工作台", url: "/blog/projects/jizhiyun-pro/index.html", icon: "☁️", color: "c3", builtin: true },
+  { id: "builtin-shantou", name: "我们的山头", desc: "我的世界（Minecraft）服务器官网，BE 版 + Java 版，含冒险探索和红石科技子页", url: "/blog/projects/shantou/index.html", icon: "⛏️", color: "c4", builtin: true },
+  { id: "builtin-restaurant", name: "餐厅学生管理系统", desc: "面向餐厅场景的学生管理系统：首页、学生管理、后厨管理、管理员后台", url: "/blog/projects/restaurant/index.html", icon: "🍽️", color: "c5", builtin: true },
+  { id: "builtin-earth", name: "Earth Online", desc: "交互式地球轨道设计器，实时 3D 可视化轨道参数", url: "/blog/projects/earth-online/index.html", icon: "🌍", color: "c6", builtin: true },
+  { id: "builtin-chatrecord", name: "ChatRecord 会话时序实验室", desc: "导入聊天文本/JSON/微信截图，生成时序波形、消息量分布、平均长度、日历热力图、发送者统计、复读指数、周×小时热力图", url: "/blog/projects/chatrecord/index.html", icon: "🌸", color: "c2", builtin: true },
+  { id: "builtin-blog", name: "博客首页", desc: "回到博客首页，浏览文章与全部项目", url: "/blog/", icon: "📖", color: "c1", builtin: true }
+];
+
+const VALID_COLORS = ["c1", "c2", "c3", "c4", "c5", "c6"];
+
+function projReadImported() {
+  try { return JSON.parse(fs.readFileSync(PROJECTS_FILE, "utf-8")); } catch (e) { return []; }
+}
+function projWriteImported(list) {
+  fs.writeFileSync(PROJECTS_FILE, JSON.stringify(list, null, 2), "utf-8");
+}
+function projAll() {
+  return [...BUILTIN_PROJECTS, ...projReadImported()];
+}
+
+// 验证 project.json 规范
+function projValidateManifest(manifest, folderName) {
+  const errors = [];
+  if (!manifest || typeof manifest !== "object") { errors.push("project.json 不是有效的 JSON 对象"); return errors; }
+  if (!manifest.name || typeof manifest.name !== "string" || !manifest.name.trim()) {
+    errors.push("缺少必填字段 name（项目名称）");
+  }
+  if (!manifest.entry || typeof manifest.entry !== "string" || !manifest.entry.trim()) {
+    errors.push("缺少必填字段 entry（入口文件，如 index.html）");
+  }
+  if (manifest.version && typeof manifest.version !== "string") {
+    errors.push("version 必须是字符串");
+  }
+  if (manifest.description && typeof manifest.description !== "string") {
+    errors.push("description 必须是字符串");
+  }
+  if (manifest.icon && typeof manifest.icon !== "string") {
+    errors.push("icon 必须是字符串（单个 emoji 或字符）");
+  }
+  if (manifest.color && !VALID_COLORS.includes(manifest.color)) {
+    errors.push("color 必须是 c1-c6 之一");
+  }
+  if (manifest.tags && !Array.isArray(manifest.tags)) {
+    errors.push("tags 必须是数组");
+  }
+  // 检查入口文件是否存在（仅当 entry 字段有效时）
+  if (manifest.entry && typeof manifest.entry === "string" && manifest.entry.trim()) {
+    const entryPath = path.join(PROJECTS_DIR, folderName, manifest.entry);
+    if (!fs.existsSync(entryPath)) {
+      errors.push(`入口文件不存在: ${manifest.entry}`);
+    }
+  }
+  return errors;
+}
+
+// 项目列表
+app.get("/api/projects", (req, res) => {
+  if (!isAuthed(req)) return res.status(401).json({ ok: false, msg: "请先登录" });
+  res.json({ ok: true, projects: projAll() });
+});
+
+// 扫描可导入的项目文件夹（有 project.json 但未导入的）
+app.get("/api/projects/scan", (req, res) => {
+  if (!isAuthed(req)) return res.status(401).json({ ok: false, msg: "请先登录" });
+  const imported = projReadImported();
+  const importedFolders = new Set(imported.map(p => p.folder));
+  const available = [];
+  try {
+    const folders = fs.readdirSync(PROJECTS_DIR, { withFileTypes: true }).filter(d => d.isDirectory());
+    for (const f of folders) {
+      if (importedFolders.has(f.name)) continue;
+      const manifestPath = path.join(PROJECTS_DIR, f.name, "project.json");
+      if (fs.existsSync(manifestPath)) {
+        try {
+          const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+          available.push({ folder: f.name, name: manifest.name || f.name, icon: manifest.icon || "📁", valid: projValidateManifest(manifest, f.name).length === 0 });
+        } catch (e) {
+          available.push({ folder: f.name, name: f.name, icon: "❌", valid: false, error: "project.json 解析失败" });
+        }
+      }
+    }
+  } catch (e) {}
+  res.json({ ok: true, available });
+});
+
+// 导入项目
+app.post("/api/projects/import", (req, res) => {
+  if (!isAuthed(req)) return res.status(401).json({ ok: false, msg: "请先登录" });
+  const { folder } = req.body || {};
+  const folderName = String(folder || "").trim();
+  if (!folderName) return res.status(400).json({ ok: false, msg: "请输入项目文件夹名" });
+  // 安全检查：防止路径穿越
+  if (folderName.includes("..") || folderName.includes("/") || folderName.includes("\\")) {
+    return res.status(400).json({ ok: false, msg: "文件夹名不合法" });
+  }
+  const folderPath = path.join(PROJECTS_DIR, folderName);
+  if (!fs.existsSync(folderPath) || !fs.statSync(folderPath).isDirectory()) {
+    return res.status(400).json({ ok: false, msg: `文件夹不存在: blog/projects/${folderName}` });
+  }
+  const manifestPath = path.join(folderPath, "project.json");
+  if (!fs.existsSync(manifestPath)) {
+    return res.status(400).json({ ok: false, msg: "未找到 project.json，该项目不符合导入规范" });
+  }
+  let manifest;
+  try {
+    manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+  } catch (e) {
+    return res.status(400).json({ ok: false, msg: "project.json 解析失败: " + e.message });
+  }
+  const errors = projValidateManifest(manifest, folderName);
+  if (errors.length > 0) {
+    return res.status(400).json({ ok: false, msg: "规范验证失败", errors });
+  }
+  // 检查是否已导入
+  const imported = projReadImported();
+  if (imported.find(p => p.folder === folderName)) {
+    return res.status(400).json({ ok: false, msg: "该项目已导入" });
+  }
+  const project = {
+    id: "imported-" + Date.now(),
+    folder: folderName,
+    name: manifest.name.trim(),
+    desc: manifest.description || "",
+    url: `/blog/projects/${folderName}/${manifest.entry}`,
+    icon: manifest.icon || "📁",
+    color: manifest.color || "c1",
+    version: manifest.version || "1.0.0",
+    author: manifest.author || "",
+    tags: manifest.tags || [],
+    importedAt: Date.now(),
+    builtin: false
+  };
+  imported.push(project);
+  projWriteImported(imported);
+  res.json({ ok: true, project, msg: `导入成功: ${project.name}` });
+});
+
+// 删除导入的项目
+app.delete("/api/projects/:id", (req, res) => {
+  if (!isAuthed(req)) return res.status(401).json({ ok: false, msg: "请先登录" });
+  const id = req.params.id;
+  if (id.startsWith("builtin-")) return res.status(400).json({ ok: false, msg: "内置项目不可删除" });
+  let imported = projReadImported();
+  const idx = imported.findIndex(p => p.id === id);
+  if (idx < 0) return res.status(404).json({ ok: false, msg: "项目不存在" });
+  const removed = imported.splice(idx, 1)[0];
+  projWriteImported(imported);
+  res.json({ ok: true, msg: `已删除: ${removed.name}` });
+});
+
 /* ================= 公开页面（无需登录） ================= */
 // 站点根 / 登录页：登录页就是最外层入口（与启动脚本同目录的 index.html）
 app.get(["/", "/index.html", "/login", "/login.html"], (req, res) => {
