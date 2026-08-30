@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -180,10 +180,24 @@
 </div>
 
 <script>
+// CSRF 工具
+function getCsrfToken() {
+  const match = document.cookie.match(/(?:^|; )csrf_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+async function apiapiFetch(url, options = {}) {
+  const method = (options.method || "GET").toUpperCase();
+  if (method !== "GET" && method !== "HEAD") {
+    options.headers = options.headers || {};
+    options.headers["X-CSRF-Token"] = getCsrfToken();
+  }
+  return fetch(url, options);
+}
+
 // 获取当前登录用户
 async function loadUser() {
   try {
-    const res = await fetch("/api/me", { credentials: "include" });
+    const res = await apiFetch("/api/me", { credentials: "include" });
     const data = await res.json();
     if (data.ok) {
       document.getElementById("username").textContent = data.username;
@@ -220,7 +234,7 @@ async function changePassword() {
   }
 
   try {
-    const res = await fetch("/api/change-password", {
+    const res = await apiFetch("/api/change-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -241,7 +255,7 @@ async function changePassword() {
 // 退出登录
 async function logout() {
   try {
-    await fetch("/api/logout", { method: "POST", credentials: "include" });
+    await apiFetch("/api/logout", { method: "POST", credentials: "include" });
   } catch (e) {}
   window.location.href = "/login.html";
 }

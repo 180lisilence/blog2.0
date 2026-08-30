@@ -1,4 +1,4 @@
-/* ChatRecord 主逻辑：会话管理 + 自动保存 + 数据加载 + 统计 + 图表渲染 */
+﻿/* ChatRecord 主逻辑：会话管理 + 自动保存 + 数据加载 + 统计 + 图表渲染 */
 (function () {
   'use strict';
 
@@ -12,6 +12,22 @@
 
   /* ================= 工具 ================= */
   function $(id) { return document.getElementById(id); }
+
+  // CSRF token 获取
+  function getCsrfToken() {
+    const match = document.cookie.match(/(?:^|; )csrf_token=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+  // 带 CSRF token 的 fetch
+  function apiapiFetch(url, options) {
+    options = options || {};
+    const method = (options.method || 'GET').toUpperCase();
+    if (method !== 'GET' && method !== 'HEAD') {
+      options.headers = options.headers || {};
+      options.headers['X-CSRF-Token'] = getCsrfToken();
+    }
+    return apiFetch(url, options);
+  }
   function setSaveStatus(text, cls) {
     const el = $('saveStatus');
     el.textContent = text;
@@ -94,7 +110,7 @@
     isSaving = true;
     setSaveStatus('保存中...', 'saving');
     try {
-      const r = await fetch(API + '/sessions/' + currentSession.id, {
+      const r = await apiFetch(API + '/sessions/' + currentSession.id, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -121,7 +137,7 @@
   /* ================= 会话列表管理 ================= */
   async function loadSessionList() {
     try {
-      const r = await fetch(API + '/sessions');
+      const r = await apiFetch(API + '/sessions');
       const d = await r.json();
       sessionList = d.ok ? (d.sessions || []) : [];
     } catch (e) {
@@ -152,7 +168,7 @@
     // 切换前先保存当前
     if (saveTimer) { clearTimeout(saveTimer); await saveSession(); }
     try {
-      const r = await fetch(API + '/sessions/' + id);
+      const r = await apiFetch(API + '/sessions/' + id);
       const d = await r.json();
       if (d.ok) {
         currentSession = d.session;
@@ -170,7 +186,7 @@
     const name = prompt('新会话名称：', '未命名会话 ' + new Date().toLocaleDateString());
     if (!name) return;
     try {
-      const r = await fetch(API + '/sessions', {
+      const r = await apiFetch(API + '/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim(), messages: [], stats: null })
@@ -203,7 +219,7 @@
     if (!currentSession) return;
     if (!confirm('确定删除会话「' + currentSession.name + '」？此操作不可恢复。')) return;
     try {
-      const r = await fetch(API + '/sessions/' + currentSession.id, { method: 'DELETE' });
+      const r = await apiFetch(API + '/sessions/' + currentSession.id, { method: 'DELETE' });
       const d = await r.json();
       if (d.ok) {
         currentSession = null;
@@ -223,7 +239,7 @@
   }
 
   async function newSessionWithName(name) {
-    const r = await fetch(API + '/sessions', {
+    const r = await apiFetch(API + '/sessions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, messages: [], stats: null })
@@ -253,7 +269,7 @@
   async function createShare() {
     if (!currentSession) return;
     try {
-      const r = await fetch(API + '/sessions/' + currentSession.id + '/share', { method: 'POST' });
+      const r = await apiFetch(API + '/sessions/' + currentSession.id + '/share', { method: 'POST' });
       const d = await r.json();
       if (d.ok) {
         currentSession.shareId = d.shareId;
@@ -271,7 +287,7 @@
     if (!currentSession || !currentSession.shareId) return;
     if (!confirm('确定取消分享？链接将立即失效。')) return;
     try {
-      const r = await fetch(API + '/sessions/' + currentSession.id + '/share', { method: 'DELETE' });
+      const r = await apiFetch(API + '/sessions/' + currentSession.id + '/share', { method: 'DELETE' });
       const d = await r.json();
       if (d.ok) {
         currentSession.shareId = null;

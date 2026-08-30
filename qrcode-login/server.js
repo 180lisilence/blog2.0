@@ -5,14 +5,19 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const cookieParser = require("cookie-parser");
 
 const config = require("./config");
 const logger = require("./core/logger");
 const { errorHandler } = require("./core/errors");
+const health = require("./core/health");
+const ocrManager = require("./core/ocrManager");
 const pool = require("./db/pool");
 const { initDatabase } = require("./db/init");
 const { createAuthGate } = require("./middleware/auth");
 const { forceHttps, securityHeaders, createRateLimiter } = require("./middleware/security");
+const { ensureCsrfCookie, verifyCsrfToken, getCsrfToken } = require("./middleware/csrf");
+const { startCleanup: startLoginLockCleanup } = require("./middleware/loginLock");
 
 const authRoutes = require("./modules/auth/routes");
 const authModel = require("./modules/auth/model");
@@ -27,7 +32,9 @@ app.use(forceHttps);           // 生产环境强制 HTTPS
 app.use(securityHeaders);      // 安全响应头
 app.use(createRateLimiter(300, 60000)); // 频率限制：每分钟 300 次
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
+app.use(ensureCsrfCookie);     // 确保 CSRF token cookie
 
 // 请求日志
 app.use((req, res, next) => {
@@ -35,10 +42,23 @@ app.use((req, res, next) => {
   next();
 });
 
-// ========== API 路由 ==========
-app.use("/api", authRoutes);
-app.use("/api/chatrecord", chatrecordRoutes);
-app.use("/api/projects", projectsRoutes);
+// ========== 健康检查（无需登录，无需 CSRF） ==========
+app.get("/health", async (req, res) => {
+  const result = await health.fullHealthCheck();
+  const statusCode = result.status === "ok" ? 200 : 503;
+  res.status(statusCode).json(result);
+});
+app.get("/health/live", (req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+// CSRF token 获取接口
+app.get("/api/csrf-token", getCsrfToken);
+
+// ========== API 路由（CSRF 验证） ==========
+app.use("/api", verifyCsrfToken, authRoutes);
+app.use("/api/chatrecord", verifyCsrfToken, chatrecordRoutes);
+app.use("/api/projects", verifyCsrfToken, projectsRoutes);
 
 // ========== 认证守卫 ==========
 const authGate = createAuthGate(authSession.webSessions);
@@ -104,12 +124,24 @@ async function start() {
   // 3. 启动会话清理定时器
   authSession.startCleanup();
 
-  // 4. 启动服务
+  // 4. 启动登录失败锁定清理
+  startLoginLockCleanup();
+
+  // 5. 初始化 OCR 管理器（可选自动启动）
+  try {
+    await ocrManager.init();
+  } catch (e) {
+    logger.warn("startup", "OCR 管理器初始化失败（不影响主功能）", e.message);
+  }
+
+  // 6. 启动服务
   app.listen(config.port, () => {
     logger.info("startup", `服务启动: http://127.0.0.1:${config.port}`);
     logger.info("startup", `局域网地址: ${config.baseURL}`);
     logger.info("startup", `登录页: http://127.0.0.1:${config.port}/`);
+    logger.info("startup", `健康检查: http://127.0.0.1:${config.port}/health`);
     logger.info("startup", `数据库: MySQL ${config.db.host}:${config.db.port}/${config.db.database}`);
+    logger.info("startup", `环境: ${process.env.NODE_ENV || "development"}`);
     logger.info("startup", "========================================");
   });
 }
@@ -122,6 +154,13 @@ start().catch(err => {
 // 优雅关闭
 process.on("SIGTERM", async () => {
   logger.info("startup", "收到 SIGTERM，正在关闭...");
+  ocrManager.stopOcrProcess();
+  await pool.end().catch(() => {});
+  process.exit(0);
+});
+process.on("SIGINT", async () => {
+  logger.info("startup", "收到 SIGINT，正在关闭...");
+  ocrManager.stopOcrProcess();
   await pool.end().catch(() => {});
   process.exit(0);
 });

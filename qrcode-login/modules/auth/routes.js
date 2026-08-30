@@ -15,6 +15,7 @@ const { validateUsername, validatePassword, safeGet } = require("../../core/secu
 const userModel = require("./model");
 const sessionMgr = require("./session");
 const { getTokenFromReq } = require("../../middleware/auth");
+const { loginLockCheck, recordFailure, clearFailure } = require("../../middleware/loginLock");
 
 const router = express.Router();
 
@@ -89,15 +90,24 @@ router.post("/register", asyncHandler(async (req, res) => {
 }));
 
 // 账号密码登录
-router.post("/login", (req, res) => {
+router.post("/login", loginLockCheck, (req, res) => {
   const { username, password } = req.body || {};
   const u = String(username || "").trim();
   const p = String(password || "");
+  const ip = req.loginIp || req.ip;
   if (!u || !p) return fail(res, 400, "请输入账号和密码");
 
   const user = userModel.verifyPassword(u, p);
-  if (!user) return fail(res, 400, "账号或密码错误");
+  if (!user) {
+    const result = recordFailure(ip, u);
+    const msg = result.locked
+      ? `尝试次数过多，请 ${Math.round(result.remainSec)} 秒后再试`
+      : `账号或密码错误（还可尝试 ${result.remaining} 次）`;
+    return fail(res, result.locked ? 429 : 400, msg);
+  }
 
+  // 登录成功，清除失败记录
+  clearFailure(ip, u);
   const webToken = sessionMgr.createWebSession(u);
   logger.info("auth-route", `账号密码登录: ${u}`);
   ok(res, { webToken, username: u });

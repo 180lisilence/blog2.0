@@ -5,6 +5,7 @@
  * - errorHandler: 全局错误中间件
  */
 const logger = require("./logger");
+const crypto = require("crypto");
 
 class AppError extends Error {
   constructor(statusCode, message, details) {
@@ -12,6 +13,7 @@ class AppError extends Error {
     this.statusCode = statusCode;
     this.details = details;
     this.isOperational = true;
+    this.requestId = crypto.randomUUID();
     Error.captureStackTrace?.(this, AppError);
   }
 }
@@ -50,14 +52,22 @@ function fail(res, statusCode, msg, details) {
 
 // 全局错误处理中间件
 function errorHandler(err, req, res, _next) {
+  const isProd = process.env.NODE_ENV === "production";
+  const requestId = err.requestId || crypto.randomUUID();
+
   // 业务错误
   if (err instanceof AppError) {
-    logger.warn("errorHandler", `[${err.statusCode}] ${req.method} ${req.url} - ${err.message}`);
-    return fail(res, err.statusCode, err.message, err.details);
+    logger.warn("errorHandler", `[${err.statusCode}] ${req.method} ${req.url} - ${err.message} (requestId=${requestId})`);
+    // 生产环境不返回 details（可能包含敏感信息）
+    const details = isProd ? undefined : err.details;
+    return fail(res, err.statusCode, err.message, details);
   }
+
   // 未知错误
-  logger.error("errorHandler", `未捕获异常 ${req.method} ${req.url}`, err);
-  fail(res, 500, "服务器内部错误");
+  logger.error("errorHandler", `未捕获异常 ${req.method} ${req.url} (requestId=${requestId})`, err);
+  // 生产环境返回通用错误，不暴露内部信息
+  const msg = isProd ? "服务器内部错误，请稍后重试" : "服务器内部错误";
+  fail(res, 500, msg);
 }
 
 module.exports = { AppError, errors, asyncHandler, ok, fail, errorHandler };

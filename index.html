@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -472,6 +472,21 @@
   let expireAt = 0;
   let currentTab = 'password';
 
+  // ========== CSRF 工具 ==========
+  function getCsrfToken() {
+    const match = document.cookie.match(/(?:^|; )csrf_token=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+  // 带 CSRF token 的 fetch 封装
+  async function apiapiFetch(url, options = {}) {
+    const method = (options.method || "GET").toUpperCase();
+    if (method !== "GET" && method !== "HEAD") {
+      options.headers = options.headers || {};
+      options.headers["X-CSRF-Token"] = getCsrfToken();
+    }
+    return fetch(url, options);
+  }
+
   // Tab 切换
   function switchTab(tab) {
     currentTab = tab;
@@ -593,7 +608,7 @@
     if (!sliderVerified) { err.textContent = "请先完成滑块验证"; return; }
     btn.disabled = true; btn.textContent = "登录中...";
     try {
-      const r = await fetch("/api/login", {
+      const r = await apiFetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: u, password: p })
@@ -647,7 +662,7 @@
     if (p !== p2) { err.textContent = "两次输入的密码不一致"; return; }
     btn.disabled = true; btn.textContent = "注册中...";
     try {
-      const r = await fetch("/api/register", {
+      const r = await apiFetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: u, password: p })
@@ -676,7 +691,7 @@
     hideMask();
     setStatus("正在加载二维码...", "pending");
     try {
-      const resp = await fetch("/api/qrcode/generate");
+      const resp = await apiFetch("/api/qrcode/generate");
       const data = await resp.json();
       if (!data.qid) throw new Error("生成失败");
       qid = data.qid;
@@ -715,7 +730,7 @@
     clearInterval(pollTimer);
     pollTimer = setInterval(async () => {
       try {
-        const res = await fetch(`/api/qrcode/check?qid=${qid}`);
+        const res = await apiFetch(`/api/qrcode/check?qid=${qid}`);
         const ret = await res.json();
         switch (ret.status) {
           case "pending": setStatus("等待手机扫码", "pending"); break;
@@ -757,7 +772,7 @@
   // 已登录检测
   (async () => {
     try {
-      const r = await fetch("/api/me");
+      const r = await apiFetch("/api/me");
       const d = await r.json();
       if (d.ok) {
         const box = document.querySelector(".login-box");
@@ -770,7 +785,7 @@
         document.getElementById("switchAcc").onclick = async () => {
           const cur = document.cookie.split(";").map(s => s.trim()).find(s => s.startsWith("web_token="));
           const t = cur ? decodeURIComponent(cur.split("=").slice(1).join("=")) : "";
-          try { await fetch("/api/logout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: t }) }); } catch (e) {}
+          try { await apiFetch("/api/logout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: t }) }); } catch (e) {}
           document.cookie = "web_token=; path=/; max-age=0";
           document.cookie = "web_guest=; path=/; max-age=0";
           location.reload();
