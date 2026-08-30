@@ -68,6 +68,21 @@ npm run lint:fix
 npm run format
 ```
 
+### 运行单元测试
+
+```bash
+# 运行全部测试（56个用例，不依赖外部框架）
+npm test
+```
+
+测试覆盖：安全模块（24）、错误处理（13）、会话管理（10）、项目验证器（9）。
+
+## 📖 开发者文档
+
+- [架构说明](./docs/architecture.md) - 分层设计、模块职责、认证流程、错误处理规范
+- [API 文档](./docs/api.md) - 全部接口说明、请求/响应格式、错误码汇总
+- [数据库设计](./docs/database.md) - 表结构、初始化流程、数据迁移、备份建议
+
 ## ⚙️ 配置说明
 
 所有配置通过环境变量管理，复制 `.env.example` 为 `.env` 即可修改：
@@ -99,6 +114,16 @@ myself-blog-beta/
 ├── 打开博客.bat                 # 一键启动脚本
 ├── LICENSE                     # MIT 许可证
 ├── README.md
+├── docs/                       # 📖 开发者文档
+│   ├── architecture.md         # 架构说明（分层设计/模块职责/认证流程）
+│   ├── api.md                  # API 文档（全部接口说明）
+│   └── database.md             # 数据库设计（表结构/初始化/迁移）
+├── tests/                      # 🧪 单元测试
+│   ├── run.js                  # 测试运行器
+│   ├── security.test.js        # 安全模块测试（24个用例）
+│   ├── errors.test.js          # 错误处理测试（13个用例）
+│   ├── auth-session.test.js    # 会话管理测试（10个用例）
+│   └── validator.test.js       # 项目验证器测试（9个用例）
 ├── blog/                       # 博客内容（登录后才能访问）
 │   ├── index.html              # 博客首页
 │   ├── assets/                 # 博客静态资源
