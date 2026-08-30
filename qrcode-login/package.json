@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "lint": "node -c server.js && node -c config/index.js && node -c core/logger.js && node -c core/errors.js && node -c core/security.js && node -c db/pool.js && node -c db/init.js && node -c middleware/auth.js && node -c modules/auth/model.js && node -c modules/auth/session.js && node -c modules/auth/routes.js && node -c modules/chatrecord/service.js && node -c modules/chatrecord/ocr.js && node -c modules/chatrecord/routes.js && node -c modules/projects/validator.js && node -c modules/projects/service.js && node -c modules/projects/routes.js"
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "format": "prettier --write \"**/*.js\"",
+    "format:check": "prettier --check \"**/*.js\""
   },
   "keywords": [
     "blog",
@@ -23,6 +26,10 @@
     "mysql2": "^3.24.2",
     "qrcode": "^1.5.4",
     "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5"
   },
   "engines": {
     "node": ">=16.0.0"
