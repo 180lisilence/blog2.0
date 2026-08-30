@@ -24,6 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^4.22.2",
     "mysql2": "^3.24.2",
     "qrcode": "^1.5.4",

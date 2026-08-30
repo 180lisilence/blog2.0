@@ -1,7 +1,10 @@
 /**
  * 配置管理
  * 统一管理环境变量、路径、常量
+ * 环境变量从 .env 文件加载（dotenv），变量名与 .env.example 保持一致
  */
+require("dotenv").config();
+
 const path = require("path");
 const os = require("os");
 
@@ -32,10 +35,24 @@ function getLanIP() {
   return candidates.length ? candidates[0].address : "127.0.0.1";
 }
 
+// 读取数字型环境变量，无效时回退默认值
+function numEnv(key, def) {
+  const v = process.env[key];
+  if (v === undefined || v === "") return def;
+  const n = Number(v);
+  return isNaN(n) ? def : n;
+}
+
+// 读取字符串型环境变量
+function strEnv(key, def) {
+  const v = process.env[key];
+  return (v === undefined || v === "") ? def : v;
+}
+
 const config = {
   // 服务
-  port: Number(process.env.PORT) || 3000,
-  lanIP: process.env.LAN_IP || getLanIP(),
+  port: numEnv("PORT", 3000),
+  lanIP: strEnv("LAN_IP", getLanIP()),
   get baseURL() { return `http://${this.lanIP}:${this.port}`; },
 
   // 路径
@@ -46,28 +63,31 @@ const config = {
   projectsFile: path.join(ROOT_DIR, "projects.json"),
 
   // 会话超时
-  qrExpireMs: 120 * 1000,
-  webTokenExpireMs: 7 * 24 * 3600 * 1000,
+  qrExpireMs: numEnv("QR_EXPIRE_MS", 120 * 1000),
+  webTokenExpireMs: numEnv("WEB_TOKEN_EXPIRE_MS", 7 * 24 * 3600 * 1000),
 
-  // MySQL
+  // MySQL（变量名与 .env.example 一致：MYSQL_ 前缀）
   db: {
-    host: process.env.DB_HOST || "127.0.0.1",
-    port: Number(process.env.DB_PORT) || 3306,
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "123456",
-    database: process.env.DB_NAME || "myself_blog2",
+    host: strEnv("MYSQL_HOST", "127.0.0.1"),
+    port: numEnv("MYSQL_PORT", 3306),
+    user: strEnv("MYSQL_USER", "root"),
+    password: strEnv("MYSQL_PASSWORD", "123456"),
+    database: strEnv("MYSQL_DATABASE", "myself_blog2"),
     waitForConnections: true,
     connectionLimit: 5,
     charset: "utf8mb4"
   },
 
   // 默认管理员
-  defaultAdmin: { username: "admin", password: "123456" },
+  defaultAdmin: {
+    username: strEnv("DEFAULT_ADMIN_USERNAME", "admin"),
+    password: strEnv("DEFAULT_ADMIN_PASSWORD", "123456")
+  },
 
   // ChatRecord
   chatrecord: {
     dataDir: path.join(ROOT_DIR, "data", "chatrecord"),
-    ocrPort: 8765,
+    ocrPort: numEnv("OCR_PORT", 8765),
     ocrScript: path.join(BLOG_CONTENT, "projects", "chatrecord", "backend", "ocr_server.py")
   },
 
