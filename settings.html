@@ -185,7 +185,7 @@ function getCsrfToken() {
   const match = document.cookie.match(/(?:^|; )csrf_token=([^;]+)/);
   return match ? decodeURIComponent(match[1]) : null;
 }
-async function apiapiFetch(url, options = {}) {
+async function apiFetch(url, options = {}) {
   const method = (options.method || "GET").toUpperCase();
   if (method !== "GET" && method !== "HEAD") {
     options.headers = options.headers || {};

@@ -19,7 +19,7 @@
     return match ? decodeURIComponent(match[1]) : null;
   }
   // 带 CSRF token 的 fetch
-  function apiapiFetch(url, options) {
+  function apiFetch(url, options) {
     options = options || {};
     const method = (options.method || 'GET').toUpperCase();
     if (method !== 'GET' && method !== 'HEAD') {

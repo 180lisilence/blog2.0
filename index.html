@@ -478,7 +478,7 @@
     return match ? decodeURIComponent(match[1]) : null;
   }
   // 带 CSRF token 的 fetch 封装
-  async function apiapiFetch(url, options = {}) {
+  async function apiFetch(url, options = {}) {
     const method = (options.method || "GET").toUpperCase();
     if (method !== "GET" && method !== "HEAD") {
       options.headers = options.headers || {};
